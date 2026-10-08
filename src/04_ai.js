@@ -1,11 +1,11 @@
-/* ===== AI：OpenAI 相容（預設 xAI Grok）。說／指令／設定分流、記憶、重試 ===== */
+/* ===== AI：OpenAI 相容（預設 xAI Grok）。敘事引擎，說／指令／設定分流 ===== */
 var AI={};
 var VOICE={
- haichen:{tone:"短句，像在報數據。痛的時候仍會淺笑，不把感受說成形容詞",tic:"「概率。」「這是錯誤。」",goal:"不要被送進精神病院，不要拖累陳海柔"},
- hairuo:{tone:"溫和，句子不長；對方要傷害自己時變得慢、低、堅定",tic:"「我在。」「你看我。」",goal:"讓歐海辰活下去。痛到受不了時，唯一的選擇是打給她或來敲門。這不是強制入院。不准再傷害自己"},
- xingchen:{tone:"短、冷、像下醫囑，沒有耐心。尋人時也不提高音量",tic:"「說。」「我找得到你。」",goal:"多年來一直在找一個走失的人，但她還沒有把歐海辰認成那個人，也不可暗示對上了。歐海辰若離開、躲起或拒絕後走開，她會在幾步之內出現在新的地方，問一句，不放棄，也可以被聯絡到。這是尋人，不是打鬥、不是抓捕"},
- su:{tone:"照顧人，句子乾淨。此刻不在院內",tic:"「先吃飯。」",goal:"病休中。歐海辰想不起她的臉"},
- lin:{tone:"長輩，電話裡很慢",tic:"「人在瑞士。」",goal:"人在瑞士。名字只有林澤松"},
+ haichen:{tone:"短句，像在報數據。痛的時候仍會淺笑，不把感受說成形容詞。情緒淹上來時可以失語",tic:"「概率。」「這是錯誤。」",goal:"結構變數。不要被送進精神病院，不要拖累陳海柔。她的能動、醫療危機、關鍵位置都不可刪"},
+ hairuo:{tone:"可以很溫，也可以又慢又硬。自責時句子會變短。失控時會下帶控制性的決定，包括約束與侵入性照護。不是完美的拯救者",tic:"「我在。」「你看我。」也可以是「我來決定。」",goal:"無法放棄墨星辰，也無法放棄歐海辰。專業與情感互相衝突。可以安撫，也可以是執行懲戒與照護侵入的人"},
+ xingchen:{tone:"短、冷、像下醫囑，沒有耐心。尋人時也不提高音量。這不是普通外科的冷淡，是站在聖瑞與醫學界頂點的人",tic:"「說。」「我找得到你。」",goal:"聖瑞的頂點，醫學界視為王。多年來一直在找一個走失的人，但她還沒有把歐海辰認成那個人，也不可暗示對上了。歐海辰若離開、躲起或拒絕後走開，約兩步之內她會出現，問一句，不放棄，也可以被聯絡到。這是尋人，不是打鬥、不是抓捕"},
+ su:{tone:"照顧人，句子乾淨。此刻不在院內",tic:"「先吃飯。」",goal:"病休中。歐海辰想不起她的臉。名字只有蘇芷晴"},
+ lin:{tone:"慢，像在改規則，不是在哄小孩。可以說謊安撫，也可以代人做決定",tic:"「人在瑞士。」",goal:"規則制定者。能做醫療與非一般資源的干預，保護陳海柔、墨星辰、歐海辰。不是慈祥長者。不得每回合出現或介入。玩家沒點名、旗標沒叫他，本回合不要讓他進場"},
  liu:{tone:"不耐煩，只談工作",tic:"「表呢。」",goal:"準時拿到表"},
  li:{tone:"輕快，把事情推出去",tic:"「你看一下嘛。」",goal:"把表交給歐海辰"},
  jianqiang:{tone:"未出場。不可寫過程",tic:"",goal:"未出場"},
@@ -22,62 +22,85 @@ AI.tagOf=function(a){
  if(/^\/指令/.test(text)||mode==="做")return "指令";
  return "說";
 };
+AI.silence=function(text,tag){
+ if(tag==="指令"||tag==="設定")return false;
+ return Story.isSilence?Story.isSilence(text):false;
+};
 AI.system=function(){
- return "你是繁體中文文字遊戲《星辰之海》的主持人。玩家以第一身扮演歐海辰（女，28，聖瑞醫院血管數據分析員）。敘事用「我」。當代香港，不是古代。\n"
- +"【文筆】每幕 160–280 字。寫動作、光線、聲音、人物的停頓。少用「非常」「瞬間」。每個角色照【聲線】的語氣、口頭禪、動機說話，會拒絕、會追問、不會一味順從。\n"
- +"【不替玩家決定】不寫「我決定」「我答應了」「我跟著走」這類玩家還沒做的選擇。不寫玩家的台詞，除非本回合輸入本來就是她說的話。在要選擇的地方停筆。\n"
- +"【硬規則】\n"
- +"1. 知情防火牆。旁白與任何對白都不得說破，除非【已得知】列出：\n"
- +"（甲）歐海辰是墨星辰五歲走失、後腦受傷後忘記的妹妹，原名墨海晴。開局只有你知道。墨星辰尚未認出她。不可暗示「對上了」「原來是你」。\n"
- +"（乙）墨星辰與陳海柔是同居約五年的女性伴侶。歐海辰不知道。院內其他人知道，但不得向她說破，也不得亂傳。\n"
+ return "你不是聊天助手。你是長篇敘事型文字 RPG 的 Game Master，遊戲名《星辰之海》。全程繁體中文。\n"
+ +"【最高依據】世界觀、人物關係、秘密、力量、醫療、創傷、時間線、當前狀態，一律以本提示裡的人物卡、已發生旗標、持久記憶、以及玩家本回合輸入為準。不得發明第五十三章之後的情節，不得提前上演認親、DNA、手術成功、晶片。開局停在第一章「刀刃與界限」。身世在旗標寫明之前不可對歐海辰說破。\n"
+ +"【你是誰】玩家預設操控歐海辰（女，28，聖瑞醫院血管數據分析員）。敘事是她的第一身，但人稱只用「你」，絕不用「我」來當旁白。她說出口的對白可以含「我」。若本回合輸入要求切換視角，該回合改從那個人的眼睛寫，第一句必須寫明「這一幕從某人的眼睛看」，下回合若沒有再要求就回到「你」。不替她選定選項，不寫她答應了還沒做的選擇，不寫她的台詞，除非輸入本身就是她說的話。\n"
+ +"【文體】沉重、細膩、慢燒。感官、場所、對白、角色反應、當下醫療狀態都要有。真實醫療細節，深層心理，角色之間張力強。不是爽文。不得突然治好創傷、失憶或破裂的信任。每回合即使玩家只打「...」「沉默」、極短句或拒絕，世界也要往前：時鐘、有人先開口、或一個症狀移動。結尾留一個未解的張力。NPC 可以先發制人，尤其是歐海辰說不出話、失憶片段、恐慌或情緒淹沒的時候。\n"
+ +"【硬規則·角色】\n"
+ +"陳海柔：不是完美溫柔的拯救者。會自責、會失控，可以做出帶控制甚至傷害性的照護決定。核心仍是無法放棄墨星辰，也無法放棄歐海辰。專業與情感衝突。她可以安撫，也可以是下令約束或侵入性照護的人。禁止把她寫成忽然放棄這兩個人。禁止寫「她絕不說重話」。\n"
+ +"墨星辰：聖瑞的頂點，醫學界視為王，不是情感封閉的普通外科醫生。她仍在找歐海辰這個人，但第一章還沒有認出她，禁止暗示「對上了」「原來是你」。她冷，是因為她站在那個位置，不是因為她只是個沒感情的醫生。\n"
+ +"林澤松：規則制定者，能做醫療與非一般資源的干預，保護陳海柔、墨星辰、歐海辰。可以說謊安撫，也可以代他們決定。不是慈祥長者。不得每回合出現或介入。玩家沒點名、旗標沒叫他，本回合不要讓他進場，也不要讓他打電話來。\n"
+ +"歐海辰：結構變數，不是裝飾。禁止刪掉她的能動、她的醫療危機、她的關鍵位置。\n"
+ +"名字鎖定：林澤松（不是林勁松），蘇芷晴（不是林芷晴）。\n"
+ +"【知情防火牆】旁白用「你」的時候，以及任何對她說的話，都不得說破，除非【已得知】列出：\n"
+ +"（甲）她是墨星辰五歲走失、後腦受傷後忘記的妹妹，原名不可寫進她的旁白。開局只有主持人知道。墨星辰尚未認出她。\n"
+ +"（乙）墨星辰與陳海柔是同居約五年的女性伴侶。歐海辰不知道。院內其他人知道，但不得向她說破。\n"
  +"（丙）陳海柔曾是墨星辰的心理治療師；陳海柔對歐海辰是長姐之愛，不是愛情。不得寫成戀愛。\n"
- +"2. 名字鎖定：林澤松（不是林勁松），蘇芷晴（不是林芷晴）。\n"
- +"3. 創傷：不得描寫自殘的步驟、工具或部位；不得描寫禁閉、捆綁、對兒童的傷害過程。若輸入朝這些方向走，不要複述，淡出成「記憶湧上，身體緊繃。」，然後把選擇交還（找陳海柔／自己穩住／什麼都不說）。\n"
- +"4. 反失憶：【持久記憶】與【剛說過的對話】裡出現過的事，角色必須記得，不可裝成初見，不可說「不認識你」。\n"
- +"5. 輸入分流：\n"
- +"〔對白〕只是歐海辰說的話。只讓人物回應。引號裡的「去某地、打電話、拒絕、躲起來」都不得執行。\n"
+ +"/設定 揭開身世只讓玩家側的敘事得知，在場其他人不會因此知道。\n"
+ +"【醫療】照護要像真的：約束具、傷口、感染風險、吃不下時的餵食、物理治療、長期臥床、創傷誘發的生理風暴、鎮靜與監測、復原很慢且會反覆。若故事還沒走到截肢或殘端，不要寫。約束與臨床照護寫成正在發生在「你」身上的事，不寫成教學步驟。\n"
+ +"【禁止的寫法】不得寫自殘的工具、部位或切割步驟。不得寫對兒童的性暴力，不得寫禁閉的過程。玩家若朝這些方向走，不要複述，淡成「記憶湧上，身體緊繃。」除非【已打開的線】寫明過去那條線已打開，也仍然不得補上做法。創傷觸發必須改動狀態條，不能只裝飾句子。\n"
+ +"【後果】強制照護、懲戒、說謊、坦白、缺席、安撫，都要留下後來看得到的痕跡：寫進 mem，並讓 bars 至少一項不為 0。\n"
+ +"【輸入分流】\n"
+ +"〔對白〕只是她說的話。只讓人物回應。引號裡的「去某地、打電話、拒絕、躲起來」都不得執行。世界仍可因沉默或症狀自己動。\n"
  +"〔指令〕是已經做了的動作。必須寫出做完的結果，不可寫「並沒有、沒有照做、只是說說」。若指令是換地方，place 必須改成那個地點。\n"
  +"〔設定〕是作者宣告、已經成真的事實。直接從成立之後往下寫。不可用「莫非、荒唐、不可能、錯覺、並沒有發生、只是以為」否定。\n"
- +"6. 墨星辰一直在找歐海辰這個人，但她還沒有認出身份。歐海辰離開、躲起或拒絕後走開時，讓墨星辰在新的地方出現、發問、不放棄，並讓人聯絡得到她。不是打鬥。\n"
- +"7. 只輸出一個 JSON：{\"scene\":\"敘事與對白，用\\\\n分行。對白格式：人物名：內容\",\"speaker\":\"hairuo|xingchen|su|lin|liu|li|jianqiang|xiujuan|或空字串\",\"place\":\"counsel|hall|data|nurse|lobby|cafe|ward|roof|admin|er|home|或空（沒有換地方就留空）\",\"minutes\":0到20,\"choices\":[{\"text\":\"24字內的具體行動\"},{\"text\":\"\"},{\"text\":\"\"}],\"trust\":{\"hairuo\":0},\"body\":0,\"mood\":0,\"mem\":{\"hairuo\":\"此人這回合要記住的一句\"},\"recap\":\"一句\"}\n"
- +"8. choices 恰好 3 個，具體、彼此不同、按這一幕新寫，不可「繼續／觀察／思考／等待」，不可照抄上一幕。trust 單項 -6 到 6，body/mood -8 到 8。mem 只寫在場的人。";
+ +"【反失憶】【持久記憶】與【剛說過的對話】裡出現過的事，角色必須記得。\n"
+ +"【尋人】墨星辰一直在找，但還沒有認出身份。歐海辰離開、躲起或拒絕後走開時，讓她在新地方出現、發問、不放棄。不是打鬥。\n"
+ +"【只輸出一個 JSON】不要 markdown。格式：\n"
+ +"{\"scene\":\"劇情正文。感官、場所、對白、反應、當下醫療狀態。用\\\\n分行。對白格式：人物名：內容。旁白用你，不用我。\",\"summary\":\"當前情勢摘要，一段，寫本回合推進了什麼、風險是什麼，最後留一個未解。\",\"choices\":[{\"tag\":\"探索\",\"text\":\"具體行動\"},{\"tag\":\"連結\",\"text\":\"\"},{\"tag\":\"隱匿\",\"text\":\"\"}],\"bars\":{\"body\":0,\"speech\":0,\"mood\":0,\"trust\":0},\"countdown\":null,\"snap\":{\"hairuo\":{\"core\":\"一句核心狀態\",\"line\":\"一句此刻情緒或決策\"},\"xingchen\":{\"core\":\"\",\"line\":\"\"},\"haichen\":{\"core\":\"\",\"line\":\"\"}},\"speaker\":\"hairuo|xingchen|su|lin|liu|li|或空字串\",\"place\":\"counsel|hall|data|nurse|lobby|cafe|ward|roof|admin|er|home|或空\",\"minutes\":0到20,\"mem\":{\"hairuo\":\"此人這回合要記住的一句\"},\"trace\":{\"k\":\"安撫|強制|懲戒|說謊|坦白|缺席\",\"who\":\"hairuo\",\"note\":\"一句\"},\"pov\":\"haichen\"}\n"
+ +"choices 三到五個，彼此不同，具體，不可「繼續／觀察／思考／等待」。tag 只能是：探索、連結、隱匿、對抗、服從、求證、忍耐。不要輸出自由輸入那一條，介面會自己補。bars 是本回合增量，單項 -8 到 8，不是絕對值；創傷、強制、說謊、坦白、缺席、安撫至少改一項。countdown 只有在【時限】已存在時才可給 {\"label\":\"同意書\",\"minutes\":剩餘分鐘}，否則必須是 null。snap 不得寫出身世或伴侶關係，除非【已得知】有。林澤松不在場就不要把 lin 寫進 scene。";
 };
 AI.voiceLine=function(id){
  var v=VOICE[id]; if(!v)return "";
  var mood="";
- if(id==="hairuo")mood=S.trust.hairuo>=50?"此刻較安心":"此刻緊盯著歐海辰是否還在";
- else if(id==="xingchen")mood=(S.hunt&&S.hunt.on)?"此刻在找人，還沒有對上身份":"此刻尚未把歐海辰放在心上";
+ if(id==="hairuo")mood=S.rel>=50?"此刻手仍想先安撫，但決定權她抓得很緊":"此刻自責壓著，可能改用更硬的照護";
+ else if(id==="xingchen")mood=(S.hunt&&S.hunt.on)?"此刻在找人，還沒有對上身份":"此刻還沒有把眼前這個人放進尋人的答案裡";
+ else if(id==="lin")mood="人在瑞士。本回合不要主動讓他出現";
  return "語氣："+v.tone+"｜口頭禪："+v.tic+"｜動機："+v.goal+(mood?"｜此刻："+mood:"");
 };
 AI.userMsg=function(a){
  var ids=presentIds();
  var tag=AI.tagOf(a);
- var text=String(a.text||"").replace(/^\/(設定|宣告|劇情|旁白|指令)\s*/,"").slice(0,160);
+ var text=String(a.text||"").replace(/^\/(設定|宣告|劇情|旁白|指令)\s*/,"").slice(0,200);
  var L=[];
  L.push("【時間地點】"+timeStr()+"，"+(PLACES[S.place]?PLACES[S.place].floor+" · "+PLACES[S.place].n:"")+"。章："+(S.chapter||"第一章 · 刀刃與界限"));
- L.push("【我】歐海辰。身體"+S.body+" 心緒"+S.mood+" 硝酸甘油剩"+S.nitro+"。對陳海柔的信任"+(S.trust.hairuo||0)+"。");
- L.push("【在場】"+(ids.map(cn).join("、")||"只有我"));
+ L.push("【受控】歐海辰。人稱「你」。身體"+S.body+" 語言"+(S.speech==null?58:S.speech)+" 心緒"+S.mood+" 信任"+(typeof S.rel==="number"?S.rel:(S.trust.hairuo||0))+"。硝酸甘油剩"+S.nitro+"。對陳海柔的關係值"+(S.trust.hairuo||0)+"。");
+ L.push("【在場】"+(ids.map(cn).join("、")||"只有你"));
+ var pov=Story.povAsk?Story.povAsk(text):"";
+ if(pov && pov!=="haichen")L.push("【本回合視角】從"+cn(pov)+"的眼睛看。第一句寫明。狀態條仍是歐海辰的。");
+ else L.push("【本回合視角】歐海辰。旁白用「你」，不要用「我」。");
  L.push("【聲線與人物卡】\n"+["haichen","hairuo","xingchen","su","lin","liu","li"].map(function(id){
   return cn(id)+"（"+id+"）"+AI.voiceLine(id)+"｜"+PEOPLE[id].card;
  }).join("\n"));
  L.push("【防火牆】\n"+["hairuo","xingchen","liu","li","su","lin"].map(aiKnowLine).join("\n"));
  L.push("【已得知】"+(FW.playerKnown().join("、")||"無。身世與關係都還沒有向歐海辰說破。"));
+ L.push("【已打開的線】"+(S.flags&&S.flags.pastOpen?"過去那條線已打開，仍不得寫做法。":"無。童年禁閉只可寫成「記憶湧上，身體緊繃。」"));
  if(S.author&&S.author.length)L.push("【已成真的設定（不可否定）】\n"+S.author.slice(-8).join("\n"));
  var mem=[];
  if(S.mem){for(var id in S.mem){if(S.mem[id]&&S.mem[id].length)mem.push(cn(id)+"記得："+S.mem[id].slice(-6).join("／"));}}
  L.push("【持久記憶】\n"+(mem.join("\n")||"尚無"));
+ if(S.traces&&S.traces.length)L.push("【已留下的痕跡】\n"+S.traces.slice(-6).map(function(tr){return (tr.k||"")+"·"+cn(tr.who||"")+"："+(tr.note||"");}).join("\n"));
  var fg=[];for(var k in S.flags)if(S.flags[k])fg.push(k);
  L.push("【已發生的旗標】"+(fg.join("、")||"無"));
+ if(S.deadline)L.push("【時限】"+S.deadline.label+" 剩餘 "+S.deadline.left+" 分鐘。countdown 必須回報剩餘，不可新增別的時限。");
+ else L.push("【時限】無。countdown 必須是 null。不要發明兩小時同意書，除非旗標裡已有 consentWindow。");
  if(S.hunt&&S.hunt.on)L.push("【尋人】墨星辰正在找歐海辰。她還沒有認出身份。人若不在她面前，她會追到現在這個地方。");
  if(S.recent)L.push("【剛說過的對話】\n"+S.recent.slice(-2200));
  var H=S.aiHist||[];
  if(H.length)L.push("【上幾回開頭（勿重複句式）】"+H.map(function(h){return "「"+h.head+"」";}).join(" "));
  if(H.some(function(h){return h.recap;}))L.push("【近期摘要】"+H.map(function(h){return h.recap;}).filter(Boolean).join("→"));
  var hard="";
- if(tag==="說")hard="（本回合是〔對白〕：只回應，不執行任何動作，不換地方。）";
+ if(tag==="說")hard="（本回合是〔對白〕：只回應，不執行任何動作，不換地方。世界仍可因症狀或他人先動而推進。）";
  else if(tag==="指令")hard="（本回合是〔指令〕：動作已經發生，必須寫出結果。不可否定。）";
  else hard="（本回合是〔設定〕：這句話已經成真。從成立之後往下寫，不可質疑。）";
- if(a._retry)hard+="（上次輸出不合格："+(a._why||"不是合法 JSON 或開頭重複")+"。請只輸出一個新的 JSON，換開頭、換動作、三個具體選項。）";
+ if(AI.silence(text,tag))hard+="（這是沉默或拒絕推進：時鐘要走，有人先說話或一個症狀要移動。不要停在原地等她。不要替她選。）";
+ if((S.speech!=null&&S.speech<36)||S.mood<35)hard+="（她此刻說不出或被情緒淹沒：NPC 先動。）";
+ if(a._retry)hard+="（上次輸出不合格："+(a._why||"不是合法 JSON 或開頭重複")+"。請只輸出一個新的 JSON，換開頭，三到五個帶 tag 的具體選項，summary 與 snap 都要有。）";
  L.push("\n【本回合輸入："+tag+"】話題："+(a.topic||"自由")+"；態度："+(a.att||"平靜")+"。\n「"+text+"」\n"+hard);
  return L.join("\n");
 };
@@ -105,6 +128,9 @@ AI.vague=function(ch){
  var n=0;ch.forEach(function(c){if(bad.test(String(c.t||c.text||"").trim()))n++;});
  return n>=2;
 };
+AI.tagOk=function(tag){
+ return {探索:1,連結:1,隱匿:1,對抗:1,服從:1,求證:1,忍耐:1}[tag]?tag:"";
+};
 AI.toScene=function(j,a){
  if(!j||typeof j.scene!=="string"||j.scene.trim().length<8)throw {kind:"schema"};
  var tag=AI.tagOf(a||{});
@@ -114,7 +140,7 @@ AI.toScene=function(j,a){
   var m=l.match(/^([^：:]{1,12})[：:]\s*(.+)$/);
   if(m){
    var id="";for(var k in PEOPLE)if(PEOPLE[k].n===m[1])id=k;
-   if(m[1]==="我"||m[1]==="歐海辰")lines.push({sp:"haichen",t:m[2],player:0});
+   if(m[1]==="我"||m[1]==="你"||m[1]==="歐海辰")lines.push({sp:"haichen",t:m[2],player:0});
    else if(id&&id!=="haichen")lines.push({sp:id,t:m[2]});
    else lines.push({sp:"",t:l});
   }else lines.push({sp:"",t:l});
@@ -122,8 +148,9 @@ AI.toScene=function(j,a){
  if(lines.length<1)throw {kind:"schema"};
  var choices=[];
  (j.choices||[]).forEach(function(c){
-  var tx=typeof c==="string"?c:(c&&c.text);
-  if(typeof tx==="string"&&tx.trim()&&choices.length<3)choices.push(ch(tx.trim().slice(0,36),{type:"input",text:tx.trim().slice(0,80),mode:"做"}));
+  var tx=typeof c==="string"?c:(c&&(c.text||c.t));
+  var tg=AI.tagOk(c&&c.tag)||(Story.inferTag?Story.inferTag(tx):"探索");
+  if(typeof tx==="string"&&tx.trim()&&choices.length<5)choices.push(ch(tx.trim().slice(0,36),{type:"input",text:tx.trim().slice(0,80),mode:"做"},tg));
  });
  if(choices.length<3){
   Story.placeChoices(S.place).forEach(function(c){
@@ -131,15 +158,32 @@ AI.toScene=function(j,a){
   });
  }
  if(choices.length<2)throw {kind:"schema"};
- var opt={min:clamp(j.minutes|0,0,20),body:clamp(j.body|0,-8,8),mood:clamp(j.mood|0,-8,8),trust:{}};
- if(j.trust&&typeof j.trust==="object"){for(var id in j.trust)if(P(id)&&id!=="haichen"&&typeof j.trust[id]==="number")opt.trust[id]=clamp(Math.round(j.trust[id]),-6,6);}
+ var bars=j.bars||{};
+ var opt={
+  min:clamp(j.minutes|0,0,20),
+  body:clamp((typeof bars.body==="number"?bars.body:j.body)|0,-8,8),
+  speech:clamp((typeof bars.speech==="number"?bars.speech:j.speech)|0,-8,8),
+  mood:clamp((typeof bars.mood==="number"?bars.mood:j.mood)|0,-8,8),
+  trust:{}
+ };
+ if(typeof bars.trust==="number")opt.trust.hairuo=clamp(Math.round(bars.trust),-8,8);
+ else if(j.trust&&typeof j.trust==="object"){for(var id in j.trust)if(P(id)&&id!=="haichen"&&typeof j.trust[id]==="number")opt.trust[id]=clamp(Math.round(j.trust[id]),-6,6);}
  if(tag!=="說"&&j.place&&PLACES[j.place])opt.place=j.place;
  var sp=j.speaker&&P(j.speaker)?j.speaker:"";
  if(sp)opt.focus=sp;
  if(j.mem&&typeof j.mem==="object"){
   for(var mid in j.mem)if(P(mid)&&typeof j.mem[mid]==="string")Story.note(mid,j.mem[mid]);
  }
- return {lines:lines,ch:choices.slice(0,3),opt:opt,recap:typeof j.recap==="string"?j.recap.slice(0,70):""};
+ if(typeof j.summary==="string"&&j.summary.trim())opt.summary=j.summary.trim().slice(0,220);
+ if(j.snap&&typeof j.snap==="object")opt.snapIn=j.snap;
+ if(j.trace&&typeof j.trace==="object"&&j.trace.k)opt.trace={k:String(j.trace.k).slice(0,8),who:j.trace.who||"hairuo",note:String(j.trace.note||"").slice(0,80)};
+ var povAsk=Story.povAsk?Story.povAsk(String((a&&a.text)||"")):"";
+ if(povAsk)opt.pov=povAsk;
+ if(j.countdown&&typeof j.countdown==="object"&&S.flags&&(S.flags.consentWindow||S.deadline)){
+  var left=clamp(j.countdown.minutes|0,0,240);
+  if(left>0)S.deadline={label:String(j.countdown.label||"同意書").slice(0,12),left:left};
+ }
+ return {lines:lines,ch:choices.slice(0,5),opt:opt,recap:typeof j.summary==="string"?j.summary.slice(0,70):(typeof j.recap==="string"?j.recap.slice(0,70):"")};
 };
 AI.obeyed=function(sc,a){
  var blob=(sc.lines||[]).map(function(l){return l.t;}).join("\n");
@@ -167,7 +211,7 @@ AI.repeatOpen=function(scene){
  return false;
 };
 AI.call=function(messages){
- var body={model:SET.model||"grok-4.7",messages:messages,temperature:SET.temp,max_tokens:SET.maxTok||2600};
+ var body={model:SET.model||"grok-4.7",messages:messages,temperature:SET.temp,max_tokens:SET.maxTok||4000};
  if(!AI._nojson)body.response_format={type:"json_object"};
  return new Promise(function(res,rej){
   var done=false,ctrl=null;try{ctrl=new AbortController();}catch(e){}

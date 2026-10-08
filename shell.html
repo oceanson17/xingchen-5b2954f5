@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#10181c">
-<meta name="xc-build" content="xc-ch1-glasses-860">
+<meta name="xc-build" content="xc-gm-5block-1008">
 <title>星辰之海</title>
 <style>
 /*@@CSS@@*/
@@ -17,7 +17,7 @@
  <section id="title" class="scr on">
   <div class="mark">聖瑞</div>
   <h1>星辰之海</h1>
-  <p class="sub">第一身 · 歐海辰</p>
+  <p class="sub">第一身 · 你是歐海辰</p>
   <button class="tbtn" id="tNew"><b>開始記錄</b><small>第一章 · 刀刃與界限</small></button>
   <button class="tbtn" id="tCont"><b>繼續</b><small>讀取這部手機上的存檔</small></button>
   <button class="tbtn" id="tSet"><b>設定</b><small>xAI Grok · 自己的 API Key</small></button>
@@ -31,8 +31,14 @@
    <div id="hTime">第1日 15:00</div>
    <button id="hMenu" type="button">選單</button>
   </header>
-  <div id="meters"><span>身體 <b id="mBody">62</b></span><span>心緒 <b id="mMood">44</b></span><span>信任 <b id="mTrust">36</b></span><span>藥 <b id="mNitro">3</b></span></div>
-  <div id="box"><div id="txt"></div><div id="choices"></div></div>
+  <div id="meters"><span>身體 <b id="mBody">62</b></span><span>語言 <b id="mSpeech">58</b></span><span>心緒 <b id="mMood">44</b></span><span>信任 <b id="mTrust">36</b></span></div>
+  <div id="box">
+   <div id="txt"></div>
+   <section class="blk"><h3>當前情勢摘要</h3><p id="sum"></p></section>
+   <section class="blk"><h3>可選行動</h3><div id="choices"></div><p id="freeHint">E.【自由輸入】底下自己打。遊戲不會替你選。</p></section>
+   <section class="blk"><h3>狀態條與倒計時</h3><p id="barWho"></p><div id="bars"></div><p id="count" hidden></p></section>
+   <section class="blk"><h3>人物資料與關係快照</h3><div id="snap"></div></section>
+  </div>
   <div id="composer">
    <div id="chips"></div>
    <div id="inrow">
