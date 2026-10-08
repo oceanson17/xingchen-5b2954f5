@@ -80,6 +80,11 @@ function sceneBgKey(){
  if(patient)return "ward";
  return (typeof PLACE_BG!=="undefined"&&PLACE_BG[S.place])||"hall";
 }
+function youLine(t){
+ var s=String(t||"").replace(/^「/,"").replace(/」$/,"").replace(/\s+/g," ").trim();
+ if(!s)s="……";
+ return "你說："+s;
+}
 function render(){
  if(!S||!S.view)return;
  var pl=PLACES[S.place]||{n:"",floor:""};
@@ -100,19 +105,30 @@ function render(){
  renderTurn();
  var html="";
  var src=(S.log&&S.log.length)?S.log:(S.view.lines||[]);
+ var block=null;
+ function flush(){
+  if(!block)return;
+  var person=P(block.sp)||PEOPLE[block.sp]||{n:block.sp,color:"#9bb"};
+  var lines=block.lines.map(function(tx){return '<p class="ln">'+esc(tx)+"</p>";}).join("");
+  html+='<div class="speech" data-who="'+esc(block.sp)+'">'+avatarHtml(block.sp)+'<div class="who"><div class="nm" style="color:'+esc(person.color||"#9bb")+'">'+esc(person.n||"")+"</div>"+lines+"</div></div>";
+  block=null;
+ }
  src.forEach(function(l){
   if(l.player||l.sp==="haichen"){
-   html+='<div class="bubble me" data-side="me"><div class="bk"><div class="nm">你</div><div class="ln">'+esc(l.t)+"</div></div></div>";
+   flush();
+   html+='<p class="yousaid">'+esc(youLine(l.t))+"</p>";
    return;
   }
   if(!l.sp){
+   flush();
    if(/^第.+章/.test(l.t))html+='<p class="chap">'+esc(l.t)+"</p>";
    else html+='<p class="stage">'+esc(l.t)+"</p>";
    return;
   }
-  var p=P(l.sp)||PEOPLE[l.sp]||{n:l.sp,color:"#9bb"};
-  html+='<div class="bubble npc" data-side="npc" data-who="'+esc(l.sp)+'">'+avatarHtml(l.sp)+'<div class="bk"><div class="nm" style="color:'+esc(p.color||"#9bb")+'">'+esc(p.n||"")+'</div><div class="ln">'+esc(l.t)+"</div></div></div>";
+  if(block&&block.sp===l.sp)block.lines.push(l.t);
+  else{flush();block={sp:l.sp,lines:[l.t]};}
  });
+ flush();
  document.getElementById("txt").innerHTML=html;
  var ch=document.getElementById("choices");ch.innerHTML="";
  (S.view.ch||[]).slice(0,5).forEach(function(c,i){
@@ -184,7 +200,7 @@ function sheetMenu(){
  h+='<button class="row" id="mSave" type="button"><b>存檔</b><small>寫入這部瀏覽器</small></button>';
  h+='<button class="row" id="mTitle" type="button"><b>回標題</b><small>進度已自動存</small></button>';
  h+='<button class="row" id="mSet" type="button"><b>AI 設定</b><small>'+(SET.ai?"已啟用":"未啟用")+"</small></button>";
- h+='<p class="logl">他們在跟你說話。「說」只是回一句。「做」和 /指令 會真的發生。/設定 已經成立。只打「...」，對方會把話接下去。人物在「人物」。</p>';
+ h+='<p class="logl">人在房間裡對你說話。「說」只是回一句。「做」和 /指令 會真的發生。/設定 已經成立。只打「...」，對方會把話接下去。人物在「人物」。</p>';
  openSheet("選單",h);
  document.getElementById("mPeople").onclick=function(){sheetPeople();};
  document.getElementById("mSave").onclick=function(){saveGame(false);};

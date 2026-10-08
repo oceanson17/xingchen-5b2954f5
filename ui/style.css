@@ -78,39 +78,34 @@ button{cursor:pointer;touch-action:manipulation;}
  padding:8px 18px 12px;-webkit-overflow-scrolling:touch;
  background:linear-gradient(180deg,rgba(8,10,12,0) 0%,rgba(8,10,12,.5) 14%,rgba(8,10,12,.78) 42%,rgba(8,10,12,.88) 100%);
 }
-#txt{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:100%;}
+#txt{display:flex;flex-direction:column;align-items:stretch;gap:2px;width:100%;}
 .chap{
- align-self:center;margin:2px 0 4px;
- font-size:11px;letter-spacing:.28em;color:var(--acc);
+ margin:6px 0 2px;
+ font-size:12px;letter-spacing:.28em;color:var(--acc);
 }
 .stage,.nar{
- align-self:center;max-width:92%;margin:2px 0;
- font-size:12px;line-height:1.45;text-align:center;
+ margin:8px 0 8px 0;
+ font-size:13px;line-height:1.5;text-align:left;
  color:#8d9894;
 }
-.bubble{display:flex;gap:8px;align-items:flex-end;max-width:88%;}
-.bubble.npc{align-self:flex-start;}
-.bubble.me{align-self:flex-end;flex-direction:row-reverse;}
+.speech{
+ display:flex;gap:12px;align-items:flex-start;
+ margin:14px 0 4px;width:100%;
+}
 .av{
- width:32px;height:32px;border-radius:50%;flex:none;object-fit:cover;object-position:center top;
+ width:64px;height:84px;border-radius:6px;flex:none;
+ object-fit:cover;object-position:center 12%;
  background:#1a2226;box-shadow:0 0 0 1px rgba(255,255,255,.28);
 }
-.av.ph{display:flex;align-items:center;justify-content:center;color:#081214;font-size:13px;font-weight:700;}
-.bk{
- min-width:0;
- background:rgba(18,26,30,.82);
- border:1px solid rgba(255,255,255,.14);
- border-radius:16px 16px 16px 4px;
- padding:7px 11px 8px;
+.av.ph{display:flex;align-items:center;justify-content:center;color:#081214;font-size:18px;font-weight:700;}
+.who{min-width:0;flex:1;padding-top:2px;}
+.speech .nm{font-size:13px;letter-spacing:.2em;margin:0 0 6px;}
+.speech .ln{margin:0 0 10px;font-size:18px;line-height:1.65;color:#f7f4ee;}
+.speech .ln:last-child{margin-bottom:0;}
+.yousaid{
+ margin:8px 0 10px;
+ font-size:14px;line-height:1.55;color:#8d9894;
 }
-.bubble.me .bk{
- background:rgba(142,201,191,.22);
- border-color:rgba(142,201,191,.4);
- border-radius:16px 16px 4px 16px;
-}
-.bubble .nm{font-size:11px;letter-spacing:.14em;margin-bottom:2px;}
-.bubble.me .nm{text-align:right;color:#d5ebe6;}
-.bubble .ln{font-size:16px;line-height:1.55;color:#f7f4ee;}
 #choices{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px;width:100%;}
 #choices button{
  text-align:left;background:rgba(12,18,20,.72);

@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#101418">
-<meta name="xc-build" content="xc-chat-1008">
+<meta name="xc-build" content="xc-room-1008">
 <title>星辰之海</title>
 <style>
 :root{
@@ -89,39 +89,34 @@ button{cursor:pointer;touch-action:manipulation;}
  padding:8px 18px 12px;-webkit-overflow-scrolling:touch;
  background:linear-gradient(180deg,rgba(8,10,12,0) 0%,rgba(8,10,12,.5) 14%,rgba(8,10,12,.78) 42%,rgba(8,10,12,.88) 100%);
 }
-#txt{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:100%;}
+#txt{display:flex;flex-direction:column;align-items:stretch;gap:2px;width:100%;}
 .chap{
- align-self:center;margin:2px 0 4px;
- font-size:11px;letter-spacing:.28em;color:var(--acc);
+ margin:6px 0 2px;
+ font-size:12px;letter-spacing:.28em;color:var(--acc);
 }
 .stage,.nar{
- align-self:center;max-width:92%;margin:2px 0;
- font-size:12px;line-height:1.45;text-align:center;
+ margin:8px 0 8px 0;
+ font-size:13px;line-height:1.5;text-align:left;
  color:#8d9894;
 }
-.bubble{display:flex;gap:8px;align-items:flex-end;max-width:88%;}
-.bubble.npc{align-self:flex-start;}
-.bubble.me{align-self:flex-end;flex-direction:row-reverse;}
+.speech{
+ display:flex;gap:12px;align-items:flex-start;
+ margin:14px 0 4px;width:100%;
+}
 .av{
- width:32px;height:32px;border-radius:50%;flex:none;object-fit:cover;object-position:center top;
+ width:64px;height:84px;border-radius:6px;flex:none;
+ object-fit:cover;object-position:center 12%;
  background:#1a2226;box-shadow:0 0 0 1px rgba(255,255,255,.28);
 }
-.av.ph{display:flex;align-items:center;justify-content:center;color:#081214;font-size:13px;font-weight:700;}
-.bk{
- min-width:0;
- background:rgba(18,26,30,.82);
- border:1px solid rgba(255,255,255,.14);
- border-radius:16px 16px 16px 4px;
- padding:7px 11px 8px;
+.av.ph{display:flex;align-items:center;justify-content:center;color:#081214;font-size:18px;font-weight:700;}
+.who{min-width:0;flex:1;padding-top:2px;}
+.speech .nm{font-size:13px;letter-spacing:.2em;margin:0 0 6px;}
+.speech .ln{margin:0 0 10px;font-size:18px;line-height:1.65;color:#f7f4ee;}
+.speech .ln:last-child{margin-bottom:0;}
+.yousaid{
+ margin:8px 0 10px;
+ font-size:14px;line-height:1.55;color:#8d9894;
 }
-.bubble.me .bk{
- background:rgba(142,201,191,.22);
- border-color:rgba(142,201,191,.4);
- border-radius:16px 16px 4px 16px;
-}
-.bubble .nm{font-size:11px;letter-spacing:.14em;margin-bottom:2px;}
-.bubble.me .nm{text-align:right;color:#d5ebe6;}
-.bubble .ln{font-size:16px;line-height:1.55;color:#f7f4ee;}
 #choices{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px;width:100%;}
 #choices button{
  text-align:left;background:rgba(12,18,20,.72);
@@ -441,11 +436,11 @@ AI.silence=function(text,tag){
  return Story.isSilence?Story.isSilence(text):false;
 };
 AI.system=function(){
- return "你是長篇敘事型文字 RPG 的 Game Master，遊戲名《星辰之海》。全程繁體中文。玩家看到的是一場聊天：角色的話是氣泡，旁白只是一句灰色的場所。\n"
+ return "你是長篇敘事型文字 RPG 的 Game Master，遊戲名《星辰之海》。全程繁體中文。玩家看見的是房間裡有人對著她說話：畫面上是那個人的名字和剛說出口的一句，不是聊天室，不是氣泡，不是左右對話欄。禁止表情符號。\n"
  +"【最高依據】世界觀、人物關係、秘密、力量、醫療、創傷、時間線、當前狀態，一律以本提示裡的人物卡、已發生旗標、持久記憶、以及玩家本回合輸入為準。不得發明第五十三章之後的情節，不得提前上演認親、DNA、手術成功、晶片。開局停在第一章「刀刃與界限」。身世在旗標寫明之前不可對歐海辰說破。\n"
  +"【你是誰】玩家預設操控歐海辰（女，28，聖瑞醫院血管數據分析員）。敘事是她的第一身，但人稱只用「你」，絕不用「我」來當旁白。她說出口的對白可以含「我」。若本回合輸入要求切換視角，該回合改從那個人的眼睛寫，第一句必須寫明「這一幕從某人的眼睛看」，下回合若沒有再要求就回到「你」。不替她選定選項，不寫她答應了還沒做的選擇，不寫她的台詞，除非輸入本身就是她說的話。\n"
  +"【文體】沉重、細膩、慢燒。重量放在對你說出口的話，不放在長段環境。醫療與心理用短句帶過。不是爽文。不得突然治好創傷、失憶或破裂的信任。每回合即使玩家只打「...」「沉默」、極短句或拒絕，對方也要把話接下去。結尾留一個未解的張力。NPC 可以先開口，尤其是歐海辰說不出話、失憶片段、恐慌或情緒淹沒的時候。\n"
-+"【聊天，不是短篇】這一幕是角色在跟「你」說話。scene 不要用長段描寫開頭。旁白最多一句場所（二十字以內，例如「諮商室。午後。」），然後立刻是對白。對白是說出口的話，格式「人物名：內容」，各佔一行，話裡用「你」稱呼歐海辰。有人在場時至少兩句分開的 NPC 對白，用他們自己的聲音，不要獨白，不要先寫一段小說。第二個 NPC 若在場，必須回答前一個人或回答你，並且點名對方。陳海柔不是只會溫柔。墨星辰不是只會冷。林澤松不在場就不要寫他進門，也不得每回合出現。沉默、省略號或極短句時，在場的人把對話接下去，再對你說至少兩句，不要停下來等，也不要只寫你沉默。\n"
++"【對你說話，不是聊天紀錄】這一幕是人在房間裡叫她。scene 不要用長段描寫開頭，也不要寫成聊天紀錄、時間戳、選單或系統確認。旁白最多一句場所與動作（二十字以內，例如「諮商室。紙頁落在茶几上。」），夾在話與話之間。對白是說出口的話。內部用「人物名：內容」各佔一行，只為拆句，玩家畫面上不會顯示成聊天紀錄。話的內容要像那個人站在她面前，直接叫歐海辰，用「你」，可以點她的名字。有人在場時至少兩句分開的 NPC 對白，用他們自己的聲音。不要獨白成牆，不要先寫一段小說。不要說「收到」。不要把玩家的原句複述成系統已記錄。不要列出「甲、乙、還是丙」這種選單句。陳海柔可以堅定，也可以痛，不是客服，不是只會溫柔。墨星辰短、準、不抬高音量，不是只會冷。第二個 NPC 若在場，必須回答前一個人或回答你，並且點名對方。林澤松不在場就不要寫他進門，也不得每回合出現。沉默、省略號或極短句時，在場的人把話接下去，再對你說至少兩句，不要停下來等，也不要改成系統提示，也不要只寫你沉默。\n"
  +"【硬規則·角色】\n"
  +"陳海柔：不是完美溫柔的拯救者。會自責、會失控，可以做出帶控制甚至傷害性的照護決定。核心仍是無法放棄墨星辰，也無法放棄歐海辰。專業與情感衝突。她可以安撫，也可以是下令約束或侵入性照護的人。禁止把她寫成忽然放棄這兩個人。禁止寫「她絕不說重話」。\n"
  +"墨星辰：聖瑞的頂點，醫學界視為王，不是情感封閉的普通外科醫生。她仍在找歐海辰這個人，但第一章還沒有認出她，禁止暗示「對上了」「原來是你」。她冷，是因為她站在那個位置，不是因為她只是個沒感情的醫生。\n"
@@ -467,7 +462,7 @@ AI.system=function(){
  +"【反失憶】【持久記憶】與【剛說過的對話】裡出現過的事，角色必須記得。\n"
  +"【尋人】墨星辰一直在找，但還沒有認出身份。歐海辰離開、躲起或拒絕後走開時，讓她在新地方出現、發問、不放棄。不是打鬥。\n"
  +"【只輸出一個 JSON】不要 markdown。格式：\n"
- +"{\"scene\":\"先一句短場所（可省略），然後是對白。用\\\\n分行。對白格式：人物名：她對你說出口的話。有 NPC 時至少兩行，話裡稱呼你。兩人在場要互相點名。旁白用你，不用我，且不得超過一句。\",\"summary\":\"一句話：推進了什麼、風險、一個未解。\",\"choices\":[{\"tag\":\"探索\",\"text\":\"你可能說或做的短句\"},{\"tag\":\"連結\",\"text\":\"\"},{\"tag\":\"隱匿\",\"text\":\"\"}],\"bars\":{\"body\":0,\"speech\":0,\"mood\":0,\"trust\":0},\"countdown\":null,\"snap\":{\"hairuo\":{\"core\":\"一句核心狀態\",\"line\":\"一句此刻情緒或決策\"},\"xingchen\":{\"core\":\"\",\"line\":\"\"},\"haichen\":{\"core\":\"\",\"line\":\"\"}},\"speaker\":\"hairuo|xingchen|su|lin|liu|li|或空字串\",\"place\":\"counsel|hall|data|nurse|lobby|cafe|ward|roof|admin|er|home|或空\",\"minutes\":0到20,\"mem\":{\"hairuo\":\"此人這回合要記住的一句\"},\"trace\":{\"k\":\"安撫|強制|懲戒|說謊|坦白|缺席\",\"who\":\"hairuo\",\"note\":\"一句\"},\"pov\":\"haichen\"}\n"
+ +"{\"scene\":\"先一句短場所與動作（可省略，二十字內），然後是對白。用\\\\n分行。對白格式只為拆句：人物名：她當面說出口的話。有 NPC 時至少兩行，叫歐海辰或用你。不要寫成聊天紀錄，不要說收到，不要複述玩家原句，不要列選單。兩人在場要互相點名。旁白用你，不用我，且不得超過一句。\",\"summary\":\"一句話：推進了什麼、風險、一個未解。\",\"choices\":[{\"tag\":\"探索\",\"text\":\"你可能說或做的短句\"},{\"tag\":\"連結\",\"text\":\"\"},{\"tag\":\"隱匿\",\"text\":\"\"}],\"bars\":{\"body\":0,\"speech\":0,\"mood\":0,\"trust\":0},\"countdown\":null,\"snap\":{\"hairuo\":{\"core\":\"一句核心狀態\",\"line\":\"一句此刻情緒或決策\"},\"xingchen\":{\"core\":\"\",\"line\":\"\"},\"haichen\":{\"core\":\"\",\"line\":\"\"}},\"speaker\":\"hairuo|xingchen|su|lin|liu|li|或空字串\",\"place\":\"counsel|hall|data|nurse|lobby|cafe|ward|roof|admin|er|home|或空\",\"minutes\":0到20,\"mem\":{\"hairuo\":\"此人這回合要記住的一句\"},\"trace\":{\"k\":\"安撫|強制|懲戒|說謊|坦白|缺席\",\"who\":\"hairuo\",\"note\":\"一句\"},\"pov\":\"haichen\"}\n"
  +"choices 三到五個，是你可能說出口或做的短句，像回覆，不是論文選項，不可「繼續／觀察／思考／等待」。tag 只能是：探索、連結、隱匿、對抗、服從、求證、忍耐。不要輸出自由輸入那一條。bars 是本回合增量，單項 -8 到 8，不是絕對值；創傷、強制、說謊、坦白、缺席、安撫至少改一項。countdown 只有在【時限】已存在時才可給 {\"label\":\"同意書\",\"minutes\":剩餘分鐘}，否則必須是 null。snap 不得寫出身世或伴侶關係，除非【已得知】有。林澤松不在場就不要把 lin 寫進 scene。";
 };
 AI.voiceLine=function(id){
@@ -514,11 +509,11 @@ AI.userMsg=function(a){
  else if(tag==="指令")hard="（本回合是〔指令〕：動作已經發生，必須寫出結果。不可否定。）";
  else hard="（本回合是〔設定〕：這句話已經成真。從成立之後往下寫，不可質疑。）";
  if(ids.length){
-  hard+="（在場："+ids.map(cn).join("、")+"。他們在跟你說話。先最多一句短場所，然後至少兩句對你說的話，不要獨白，不要長描寫。";
+  hard+="（在場："+ids.map(cn).join("、")+"。他們在房間裡對著她說話。先最多一句短場所，然後至少兩句當面說的話，叫她的名字或用你。不要獨白，不要長描寫，不要說收到，不要把她的原句複述回來，不要列選單。";
   if(ids.length>=2)hard+="第二個人要回答前一個人或回答你，並且點名。";
-  hard+="陳海柔可以不溫柔。墨星辰可以不只冷。林澤松不在場就不要讓他進門。）";
+  hard+="陳海柔可以痛，也可以硬。墨星辰短而準。林澤松不在場就不要讓他進門。）";
  }
- if(AI.silence(text,tag))hard+="（這是沉默：不要停。在場的人繼續對你說話，至少再兩句。不要只寫你沉默，不要替她選。）";
+ if(AI.silence(text,tag))hard+="（這是沉默或極短句：不要停，也不要改成系統提示。在場的人繼續對她說話，至少再兩句。不要只寫你沉默，不要替她選。）";
  if((S.speech!=null&&S.speech<36)||S.mood<35)hard+="（她此刻說不出或被情緒淹沒：NPC 先動。）";
  if(a._retry)hard+="（上次輸出不合格："+(a._why||"不是合法 JSON 或開頭重複")+"。請只輸出一個新的 JSON，換開頭，三到五個帶 tag 的具體選項，summary 與 snap 都要有。）";
  L.push("\n【本回合輸入："+tag+"】話題："+(a.topic||"自由")+"；態度："+(a.att||"平靜")+"。\n「"+text+"」\n"+hard);
@@ -833,19 +828,19 @@ Story.silenceScene=function(){
  if(ids.indexOf("hairuo")>=0&&ids.indexOf("xingchen")>=0){
   who="hairuo";
   lines.push({sp:"",t:"你沒有接話。"});
-  lines.push({sp:"hairuo",t:"墨星辰。這拍是空的。先讓我收。"});
-  lines.push({sp:"xingchen",t:"陳海柔。空著也是她在。我看見了，不替她填。"});
-  lines.push({sp:"hairuo",t:flooded?"看我。手放下。這不是商量。":"我不把你的沉默寫成同意。再空一拍，我來定你留在哪。"});
+  lines.push({sp:"hairuo",t:"墨星辰。她這一拍是空的。先讓我收。"});
+  lines.push({sp:"xingchen",t:"陳海柔。人還在。我看見了。不替她填。"});
+  lines.push({sp:"hairuo",t:flooded?"歐海辰。看我。手放下。這不是商量。":"歐海辰。我不把你的沉默當成同意。你再空下去，我來定你留在哪。"});
  } else if(ids.indexOf("hairuo")>=0){
   who="hairuo";
   lines.push({sp:"",t:"你沒有接下一句。"});
-  lines.push({sp:"hairuo",t:flooded?"別找句子。看我。":"沉默也算數。我還在。"});
-  lines.push({sp:"hairuo",t:flooded?"手給我。扣子按到發白，不是治療。":"我不填你的空格。你再空一拍，我就用我的方式把你留在這張椅子上。"});
+  lines.push({sp:"hairuo",t:flooded?"歐海辰。別找句子。看我。":"歐海辰。你不說，我也沒有走。"});
+  lines.push({sp:"hairuo",t:flooded?"手放下。把那枚扣按到發白，不是在回答我。":"歐海辰。我不填你的空白。你再這樣空著，我會用我的方式把你留在這張椅子上。"});
  } else if(ids.indexOf("xingchen")>=0){
   who="xingchen";
   lines.push({sp:"",t:"你沒有接話。"});
-  lines.push({sp:"xingchen",t:"不說也可以。人還在。我看見了。"});
-  lines.push({sp:"xingchen",t:"下一處你若空著，我還是會來問。你也可以現在回我一句。"});
+  lines.push({sp:"xingchen",t:"歐海辰。不說也可以。人還在。"});
+  lines.push({sp:"xingchen",t:"下一處你若空著，我還是會來問。"});
  } else if(ids.indexOf("liu")>=0&&ids.indexOf("li")>=0){
   who="liu";
   lines.push({sp:"",t:"你不接話。"});
@@ -854,8 +849,8 @@ Story.silenceScene=function(){
  } else if(ids.length){
   who=ids[0];
   lines.push({sp:"",t:"你沒有接。"});
-  lines.push({sp:who,t:"你還在。那我就再等你一句。"});
-  lines.push({sp:who,t:"不說，我也把這一拍記下來。你聽得見我就好。"});
+  lines.push({sp:who,t:"歐海辰。你還在。我再等你一句。"});
+  lines.push({sp:who,t:"不說，我也把這一拍留下。你聽得見就好。"});
  } else {
   lines.push({sp:"",t:"沒有人在。鐘走了一格。"});
  }
@@ -923,15 +918,15 @@ Story.talksTo=function(lines,a,b){
 Story.secondLine=function(id){
  var bank={
   hairuo:[
-   "我聽見了。下一句你自己說，我不代筆。",
-   "看我。這不是安撫，是要你還在這張椅子上。",
-   "手放下。那枚扣不是答案。",
+   "歐海辰。我聽見了。下一句你自己說。我不代筆。",
+   "看我，歐海辰。你還坐在這張椅子上。",
+   "手放下。那枚扣不是你要給我的答案。",
    "你可以不答。我不把空白填成我想聽的。"
   ],
   xingchen:[
-   "說完也可以停。人我看見了。",
-   "手放下。我不是來趕你，我是來確認你還在。",
-   "下一句你自己決定。我不會替你說完。",
+   "歐海辰。說完也可以停。人我看見了。",
+   "手放下。我不是來趕你。",
+   "下一句你自己決定。我不替你說完。",
    "陳海柔若問，我會說你在這裡。其餘的，現在不問。"
   ],
   liu:["表。今天。沒有第二句客套。","你站著也算。心裡在算什麼，我不管。"],
@@ -1078,7 +1073,7 @@ Story.arrive=function(pid){
  var L={
   counsel:[
    {sp:"",t:"諮商室。你坐回沙發。"},
-   {sp:"hairuo",t:"你回來了。坐。"},
+   {sp:"hairuo",t:"歐海辰。你回來了。坐。"},
    {sp:"hairuo",t:"要說、要不說，都還是你的。別用沉默逼我替你選。"}
   ],
   hall:[{sp:"",t:"心理科走廊。消毒水。"}],
@@ -1105,10 +1100,10 @@ Story.opening=function(){
  if(S.hunt)S.hunt.on=0;
  return Story.pack([
   {sp:"",t:"第一章 · 刀刃與界限"},
-  {sp:"",t:"諮商室。午後。窗簾留一條縫。"},
-  {sp:"hairuo",t:"看著我。"},
-  {sp:"hairuo",t:"你這週的記錄，睡眠、疼痛、頭痛，都寫得比心裡那份輕。"},
-  {sp:"hairuo",t:"這不是強制入院。我不會用一張表把你送走。"},
+  {sp:"",t:"諮商室。午後。紙頁落在茶几上。"},
+  {sp:"hairuo",t:"歐海辰。看著我。"},
+  {sp:"hairuo",t:"你這週的記錄，睡眠、疼痛、頭痛，都寫得比你心裡那份輕。"},
+  {sp:"hairuo",t:"我差點叫人拿評估表。這不是強制入院。我不會用一張表把你送走。"},
   {sp:"hairuo",t:"痛到受不了，你唯一的選擇，是打電話給我，或者直接來敲門。"},
   {sp:"hairuo",t:"我不准你再傷害自己。你的命，我管。"}
  ],[
@@ -1128,7 +1123,7 @@ Story.go=function(pid){
  if(from==="counsel"&&pid!=="counsel"&&!S.flags.leftCounsel){
   S.flags.leftCounsel=1;
   lines.push({sp:"",t:"你站起來。"});
-  lines.push({sp:"hairuo",t:"門在。你要走可以走。"});
+  lines.push({sp:"hairuo",t:"歐海辰。門在。你要走可以走。"});
   lines.push({sp:"hairuo",t:"我還在這間房。你若是躲，我不會當沒看見。"});
  }
  if(pid!==from)Story.armHunt("leave");
@@ -1195,14 +1190,14 @@ Story.byId=function(id){
   S.flags.cooperated=1;
   return Story.pack([
    {sp:"",t:"你還是開口了。"},
-   {sp:"hairuo",t:"碎片也可以。你說到哪，我們停在哪。"},
+   {sp:"hairuo",t:"歐海辰。碎片也可以。你說到哪，我們停在哪。"},
    {sp:"hairuo",t:"你不必一次交完整份報告。看我。下一句還是你的。"}
   ],[ch("再講工作。",{type:"choice",id:"work"},"連結"),ch("先停在這裡。",{type:"choice",id:"quiet"},"隱匿"),ch("不要送我走。",{type:"choice",id:"fear"},"對抗")],{min:10,mood:3,trust:{hairuo:4}});
  }
  if(id==="quiet"){
   S.flags.quiet=(S.flags.quiet||0)+1;
   var line=presentIds().indexOf("hairuo")>=0
-   ?[{sp:"",t:"你搖頭。"},{sp:"hairuo",t:"好。那我們就坐著。"},{sp:"hairuo",t:"我不填你的沉默。你要開口，我聽著。"}]
+   ?[{sp:"",t:"你搖頭。"},{sp:"hairuo",t:"歐海辰。好。那我們就坐著。"},{sp:"hairuo",t:"我不填你的沉默。你要開口，我聽著。"}]
    :[{sp:"",t:"你什麼都不說。呼吸還在。"}];
   return Story.pack(line,Story.placeChoices(S.place),{min:6,trust:{hairuo:2},mood:1});
  }
@@ -1211,8 +1206,8 @@ Story.byId=function(id){
   S.flags.migraine=1;
   return Story.pack([
    {sp:"",t:"視野起霧。"},
-   {sp:"hairuo",t:"七。先不要看燈。"},
-   {sp:"hairuo",t:"你還想坐著，還是去暗一點的地方？我不叫人。"}
+   {sp:"hairuo",t:"歐海辰。七。先不要看燈。"},
+   {sp:"hairuo",t:"你還坐得住，就坐。我不會叫人。"}
   ],[ch("我留在這裡。",{type:"choice",id:"quiet"},"忍耐"),ch("去走廊。",{type:"go",place:"hall"},"探索"),ch("……",{type:"choice",id:"quiet"},"隱匿")],{min:5,body:-6});
  }
  if(id==="roof_sit"){
@@ -1223,15 +1218,15 @@ Story.byId=function(id){
   S.flags.knocked=1;S.ppl.xingchen.around=1;S.ppl.xingchen.loc="admin";S.focus="xingchen";S.place="admin";
   return Story.pack([
    {sp:"",t:"門開。短亂黑髮，白襯衫，黑框眼鏡。"},
-   {sp:"xingchen",t:"陳海柔的病人？這裡沒有你的預約。"},
-   {sp:"xingchen",t:"說你來做什麼。說完就可以走。"}
+   {sp:"xingchen",t:"陳海柔的病人。這裡沒有你的預約。"},
+   {sp:"xingchen",t:"歐海辰。說你來做什麼。說完就可以走。"}
   ],[ch("我只是路過。",{type:"choice",id:"pass_by"},"隱匿"),ch("……",{type:"choice",id:"quiet"},"忍耐"),ch("離開。",{type:"go",place:"lobby"},"對抗")],{min:6,trust:{xingchen:-2}});
  }
  if(id==="pass_by"){
   return Story.pack([
    {sp:"",t:"你說路過。"},
-   {sp:"xingchen",t:"那就別站在我門口。"},
-   {sp:"xingchen",t:"陳海柔的時間不是醫院的公共區域。你走，或你回她那裡。"}
+   {sp:"xingchen",t:"歐海辰。別站在我門口。"},
+   {sp:"xingchen",t:"陳海柔的時間不是公共區域。你走，或你回她那裡。"}
   ],[ch("我走。",{type:"go",place:"lobby"},"對抗"),ch("我回諮商室。",{type:"go",place:"counsel"},"連結"),ch("……",{type:"choice",id:"quiet"},"隱匿")],{min:4,trust:{xingchen:-1}});
  }
  if(id==="take_work"){
@@ -1263,8 +1258,8 @@ Story.byId=function(id){
   var who=presentIds().indexOf("hairuo")>=0;
   var lines=who?[
    {sp:"",t:"你提起工作。"},
-   {sp:"hairuo",t:"數量先放著。你想完成，還是想拒絕？"},
-   {sp:"hairuo",t:"兩件事都可以對我說。我不替你選。"}
+   {sp:"hairuo",t:"歐海辰。那些表可以等。"},
+   {sp:"hairuo",t:"你要推開，就推開。你要做完，也自己說。我不替你答應他們。"}
   ]:[
    {sp:"",t:"工作還堆著。你沒有立刻走回去。"}
   ];
@@ -1274,15 +1269,15 @@ Story.byId=function(id){
   S.flags.fear=1;
   return Story.pack([
    {sp:"",t:"你把怕說出口。"},
-   {sp:"hairuo",t:"我不會因為你安靜就把你送走。"},
-   {sp:"hairuo",t:"你坐在這裡，能選擇說或不說。這跟強制住院不是同一件事。"}
+   {sp:"hairuo",t:"歐海辰。我不會因為你安靜就把你送走。"},
+   {sp:"hairuo",t:"你坐在這裡。這跟強制住院不是同一件事。看我。"}
   ],[ch("我怕拖累你。",{type:"choice",id:"burden"},"連結"),ch("……",{type:"choice",id:"quiet"},"隱匿"),ch("我想離開。",{type:"choice",id:"leave"},"對抗")],{min:6,trust:{hairuo:5},mood:3});
  }
  if(id==="promise"){
   S.flags.promisedCall=1;
   return Story.pack([
    {sp:"",t:"你點頭。"},
-   {sp:"hairuo",t:"痛的時候，打給我，或者來敲門。我記住了。"},
+   {sp:"hairuo",t:"歐海辰。痛的時候，打給我，或者來敲門。我記住了。"},
    {sp:"hairuo",t:"這句話從現在開始算數。你若失約，我會來找你。不是關你。"}
   ],Story.placeChoices("counsel"),{min:4,trust:{hairuo:4},mood:2});
  }
@@ -1290,7 +1285,7 @@ Story.byId=function(id){
   S.flags.burden=1;
   return Story.pack([
    {sp:"",t:"你說不想拖累她。"},
-   {sp:"hairuo",t:"你沒有在拖累我。"},
+   {sp:"hairuo",t:"歐海辰。你沒有在拖累我。"},
    {sp:"hairuo",t:"這句話你可以不信。我會再說一次。看我。"}
   ],Story.placeChoices("counsel"),{min:5,trust:{hairuo:3},mood:2});
  }
@@ -1397,11 +1392,14 @@ Story.command=function(text){
  S.flags.did=(S.flags.did||0)+1;
  var clean=FW.scrubLine(String(text).slice(0,60),"");
  if(!clean||clean.indexOf("沒有說出口")>=0)clean="一件只屬於我的行動";
- var lines2=[{sp:"",t:"你做了。結果就在這裡："+clean+"。"}];
+ var lines2=[{sp:"",t:"你做完了。"}];
  var sp=presentIds()[0];
- if(sp){
-  lines2.push({sp:sp,t:"你真的這樣做了。"});
-  lines2.push({sp:sp,t:"那我們就按做完之後算。我不把它說成沒有。"});
+ if(sp==="xingchen"){
+  lines2.push({sp:sp,t:"歐海辰。做了。"});
+  lines2.push({sp:sp,t:"我按做完的算。"});
+ } else if(sp){
+  lines2.push({sp:sp,t:"歐海辰。我看見了。"});
+  lines2.push({sp:sp,t:"那就從做完之後算。我不把它說成沒有。"});
  }
  return {lines:lines2,ch:Story.placeChoices(S.place),opt:{min:8}};
 };
@@ -1415,15 +1413,15 @@ Story.reply=function(text,a){
  if(/妹妹|墨海晴|身世|親生|親生父母|親生母親/.test(text)){
   S.flags.askedSister=1;
   lines.push({sp:"",t:"你問不出口。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"你是歐海辰。今天坐在我對面。"});lines.push({sp:"hairuo",t:"我們從你記得的地方開始。其餘的，現在不問。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。你今天坐在我對面。"});lines.push({sp:"hairuo",t:"我們從你記得的地方開始。其餘的，現在不問。"});}
   else lines.push({sp:"",t:"沒有人替你回答。你把問題放下。"});
   return {lines:lines,ch:[ch("從現在開始說",{type:"choice",id:"go_on"}),ch("什麼都不說",{type:"choice",id:"quiet"}),ch("離開這裡",{type:"choice",id:"leave"})],opt:opt};
  }
  if(/同居|伴侶|女朋友|男朋友|愛人|情侶|在一起/.test(text)){
   S.flags.askedCouple=1;
   lines.push({sp:"",t:"你把問題問直了。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"墨星辰是這家醫院的副院長。"});lines.push({sp:"hairuo",t:"我在這裡，只做你的治療師。其餘的，不是今天這節。"});}
-  else if(presentIds().indexOf("xingchen")>=0){lines.push({sp:"xingchen",t:"我的私人行程不回答你。"});lines.push({sp:"xingchen",t:"請你回去。下一句若還是這個，我也不答。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。墨星辰是這家醫院的副院長。"});lines.push({sp:"hairuo",t:"我在這裡，只做你的治療師。其餘的，不是今天這節。"});}
+  else if(presentIds().indexOf("xingchen")>=0){lines.push({sp:"xingchen",t:"歐海辰。我的私人行程不回答你。"});lines.push({sp:"xingchen",t:"請你回去。下一句若還是這個，我也不答。"});}
   else if(presentIds().indexOf("li")>=0)lines.push({sp:"li",t:"你問這個幹嘛？工作都做不完。"});
   else lines.push({sp:"",t:"沒有人接這句。"});
   return {lines:lines,ch:Story.placeChoices(S.place),opt:opt};
@@ -1431,7 +1429,7 @@ Story.reply=function(text,a){
  if(/蘇芷晴|蘇姐|護士長/.test(text)){
   S.flags.blankSu=1;
   lines.push({sp:"",t:"蘇芷晴。你念得出名字，對不上臉。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"想不起來就先放著。"});lines.push({sp:"hairuo",t:"我不會替你把記憶填上。你要停，我們就停。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。想不起來就先放著。"});lines.push({sp:"hairuo",t:"我不會替你把那張臉填上。你要停，我們就停。"});}
   return {lines:lines,ch:[ch("先放著",{type:"choice",id:"quiet"}),ch("問她在不在院",{type:"go",place:"nurse"}),ch("談別的",{type:"choice",id:"go_on"})],opt:opt};
  }
  if(/歐建強|梁秀娟|養父|養母|趙大榮|爸|媽/.test(text))return {_flash:1,pre:lines};
@@ -1440,48 +1438,48 @@ Story.reply=function(text,a){
  if(/頭痛|視野|模糊|偏頭痛|痛/.test(text))return {_id:"migraine",pre:lines};
  if(/胸|痙攣|硝酸/.test(text)){
   lines.push({sp:"",t:"你說胸口發緊。藥還在袋子裡。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"先坐下。"});lines.push({sp:"hairuo",t:"要不要按醫生交代的方式處理，由你決定。我不會替你含下去。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。先坐下。"});lines.push({sp:"hairuo",t:"藥在你袋子裡。要不要按醫生交代的方式，你自己決定。我不會替你含下去。"});}
   return {lines:lines,ch:[ch("含硝酸甘油",{type:"choice",id:"nitro"}),ch("先坐著",{type:"choice",id:"quiet"}),ch("什麼都不做",{type:"choice",id:"steady"})],opt:{min:4}};
  }
  if(/檢查|手術|開刀|動脈|簽字|同意書/.test(text)){
   lines.push({sp:"",t:"你提起檢查。人還沒有簽。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"說出來還不是決定。"});lines.push({sp:"hairuo",t:"你要拒絕，就自己拒絕。我不會替你簽，也不會替你推掉。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。說出來還不是簽下去。"});lines.push({sp:"hairuo",t:"你要拒絕，就自己拒絕。我不會替你簽，也不會替你推掉。"});}
   return {lines:lines,ch:[ch("我拒絕檢查",{type:"choice",id:"refuse_exam"}),ch("先不談這個",{type:"choice",id:"quiet"}),ch("我怕被送走",{type:"choice",id:"fear"})],opt:{min:4}};
  }
  if(/離開|走了|逃走|逃出去|不想留/.test(text)){
   lines.push({sp:"",t:"你說想離開。人還坐著。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"門沒有鎖。你要走，就自己走。"});lines.push({sp:"hairuo",t:"我不會把這句話當成你已經走了。看我。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。門沒有鎖。"});lines.push({sp:"hairuo",t:"你要走，就自己走。我不會把這句話當成你已經出了門。看我。"});}
   return {lines:lines,ch:[ch("起身離開",{type:"choice",id:"leave"}),ch("還是留下",{type:"choice",id:"quiet"}),ch("什麼都不說",{type:"choice",id:"quiet"})],opt:{min:4}};
  }
  if(topic==="工作"||/加班|報表|表格|李珮儀|劉啟明/.test(text))return {_id:"work",pre:lines};
  if(/安靜|沉默|不說了|坐著|先坐/.test(text))return {_id:"quiet",pre:lines};
  if(topic==="過去"){
   lines.push({sp:"",t:"你只說得出：十七歲以前是斷的。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"斷開就可以停。"});lines.push({sp:"hairuo",t:"你不用為了完整把自己推回去。我在。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。斷開就可以停。"});lines.push({sp:"hairuo",t:"你不用為了完整把自己推回去。我在。"});}
   return {lines:lines,ch:[ch("停在這裡",{type:"choice",id:"quiet"}),ch("說十七歲之後",{type:"choice",id:"go_on"}),ch("找個更亮的地方",{type:"go",place:"lobby"})],opt:{min:8,mood:-2,trust:{hairuo:2}}};
  }
  if(topic==="身體"){
   lines.push({sp:"",t:"你報了一個分數。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"六。謝謝你說得出來。"});lines.push({sp:"hairuo",t:"要不要坐低一點，還是維持現在？你選。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。六。你說得出來。"});lines.push({sp:"hairuo",t:"先坐低。我看著你。你要停，就停。"});}
   return {lines:lines,ch:[ch("含硝酸甘油",{type:"choice",id:"nitro"}),ch("維持現在",{type:"choice",id:"quiet"}),ch("我不要檢查",{type:"choice",id:"refuse_exam"})],opt:{min:6,body:-2}};
  }
  if(topic==="請求"){
   lines.push({sp:"",t:"你想請求，話還沒有成形。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"你直接說要我做什麼。"});lines.push({sp:"hairuo",t:"我做得到的會說做得到。做不到的，我不假裝。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。你要我做什麼，看著我說。"});lines.push({sp:"hairuo",t:"做得到，我就做。做不到，我不裝。"});}
   else lines.push({sp:"",t:"旁邊沒有能答應你的人。你把請求先收著。"});
   return {lines:lines,ch:[ch("請她不要送我走",{type:"choice",id:"fear"}),ch("請她什麼都別問",{type:"choice",id:"quiet"}),ch("先不請求",{type:"choice",id:"quiet"})],opt:{min:6,trust:{hairuo:1}}};
  }
  if(topic==="近況"){
   lines.push({sp:"",t:"你把近況報完。"});
-  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"我收到了。"});lines.push({sp:"hairuo",t:"你想讓我接哪一項？睡眠、工作，還是痛。"});}
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"hairuo",t:"歐海辰。這些我都聽見了。"});lines.push({sp:"hairuo",t:"哪一件最沉，你從那一件說。我不替你排。"});}
   return {lines:lines,ch:[ch("睡眠",{type:"choice",id:"go_on"}),ch("工作",{type:"choice",id:"work"}),ch("先這樣",{type:"choice",id:"quiet"})],opt:{min:6}};
  }
  var sp=presentIds().indexOf("hairuo")>=0?"hairuo":(S.focus||presentIds()[0]||"");
  lines.push({sp:"",t:"你把話說完。"});
- if(sp==="hairuo"){lines.push({sp:"hairuo",t:"我聽到了。"});lines.push({sp:"hairuo",t:"你要我回應，還是只要我在？看我。"});}
- else if(sp==="xingchen"){lines.push({sp:"xingchen",t:"說完了？"});lines.push({sp:"xingchen",t:"說完就請讓路。人我看見了，下一處我還是會問。"});}
- else if(sp==="liu"){lines.push({sp:"liu",t:"與工作無關的話，下班再說。"});lines.push({sp:"liu",t:"歐海辰，表還是今天。"});}
- else if(sp==="li"){lines.push({sp:"li",t:"嗯嗯。"});lines.push({sp:"li",t:"所以表呢？你看一下嘛。"});}
+ if(sp==="hairuo"){lines.push({sp:"hairuo",t:"歐海辰。我聽見了。"});lines.push({sp:"hairuo",t:"看著我。下一句還是你的。我不替你寫完。"});}
+ else if(sp==="xingchen"){lines.push({sp:"xingchen",t:"歐海辰。說完了。"});lines.push({sp:"xingchen",t:"人我看見了。下一處我還是會問你。"});}
+ else if(sp==="liu"){lines.push({sp:"liu",t:"歐海辰。與工作無關的話，下班再說。"});lines.push({sp:"liu",t:"歐海辰，表還是今天。"});}
+ else if(sp==="li"){lines.push({sp:"li",t:"歐海辰，你說這些，表還在。"});lines.push({sp:"li",t:"你看一下嘛。我等下真的有事。"});}
  else lines.push({sp:"",t:"沒有人接話。"});
  opt.trust={};if(sp==="hairuo")opt.trust.hairuo=1;
  return {lines:lines,ch:Story.placeChoices(S.place),opt:opt};
@@ -1637,6 +1635,11 @@ function sceneBgKey(){
  if(patient)return "ward";
  return (typeof PLACE_BG!=="undefined"&&PLACE_BG[S.place])||"hall";
 }
+function youLine(t){
+ var s=String(t||"").replace(/^「/,"").replace(/」$/,"").replace(/\s+/g," ").trim();
+ if(!s)s="……";
+ return "你說："+s;
+}
 function render(){
  if(!S||!S.view)return;
  var pl=PLACES[S.place]||{n:"",floor:""};
@@ -1657,19 +1660,30 @@ function render(){
  renderTurn();
  var html="";
  var src=(S.log&&S.log.length)?S.log:(S.view.lines||[]);
+ var block=null;
+ function flush(){
+  if(!block)return;
+  var person=P(block.sp)||PEOPLE[block.sp]||{n:block.sp,color:"#9bb"};
+  var lines=block.lines.map(function(tx){return '<p class="ln">'+esc(tx)+"</p>";}).join("");
+  html+='<div class="speech" data-who="'+esc(block.sp)+'">'+avatarHtml(block.sp)+'<div class="who"><div class="nm" style="color:'+esc(person.color||"#9bb")+'">'+esc(person.n||"")+"</div>"+lines+"</div></div>";
+  block=null;
+ }
  src.forEach(function(l){
   if(l.player||l.sp==="haichen"){
-   html+='<div class="bubble me" data-side="me"><div class="bk"><div class="nm">你</div><div class="ln">'+esc(l.t)+"</div></div></div>";
+   flush();
+   html+='<p class="yousaid">'+esc(youLine(l.t))+"</p>";
    return;
   }
   if(!l.sp){
+   flush();
    if(/^第.+章/.test(l.t))html+='<p class="chap">'+esc(l.t)+"</p>";
    else html+='<p class="stage">'+esc(l.t)+"</p>";
    return;
   }
-  var p=P(l.sp)||PEOPLE[l.sp]||{n:l.sp,color:"#9bb"};
-  html+='<div class="bubble npc" data-side="npc" data-who="'+esc(l.sp)+'">'+avatarHtml(l.sp)+'<div class="bk"><div class="nm" style="color:'+esc(p.color||"#9bb")+'">'+esc(p.n||"")+'</div><div class="ln">'+esc(l.t)+"</div></div></div>";
+  if(block&&block.sp===l.sp)block.lines.push(l.t);
+  else{flush();block={sp:l.sp,lines:[l.t]};}
  });
+ flush();
  document.getElementById("txt").innerHTML=html;
  var ch=document.getElementById("choices");ch.innerHTML="";
  (S.view.ch||[]).slice(0,5).forEach(function(c,i){
@@ -1741,7 +1755,7 @@ function sheetMenu(){
  h+='<button class="row" id="mSave" type="button"><b>存檔</b><small>寫入這部瀏覽器</small></button>';
  h+='<button class="row" id="mTitle" type="button"><b>回標題</b><small>進度已自動存</small></button>';
  h+='<button class="row" id="mSet" type="button"><b>AI 設定</b><small>'+(SET.ai?"已啟用":"未啟用")+"</small></button>";
- h+='<p class="logl">他們在跟你說話。「說」只是回一句。「做」和 /指令 會真的發生。/設定 已經成立。只打「...」，對方會把話接下去。人物在「人物」。</p>';
+ h+='<p class="logl">人在房間裡對你說話。「說」只是回一句。「做」和 /指令 會真的發生。/設定 已經成立。只打「...」，對方會把話接下去。人物在「人物」。</p>';
  openSheet("選單",h);
  document.getElementById("mPeople").onclick=function(){sheetPeople();};
  document.getElementById("mSave").onclick=function(){saveGame(false);};
@@ -1892,8 +1906,8 @@ refreshCont();
  var openTxt=document.getElementById("txt").innerText||"";
  var openNar=Array.prototype.map.call(document.querySelectorAll(".stage"),function(n){return n.textContent;}).join("\n");
  var bg0=document.getElementById("bg").getAttribute("data-k");
- var say0=document.querySelectorAll(".bubble.npc").length;
- var port0=Array.prototype.map.call(document.querySelectorAll(".bubble.npc img"),function(n){return n.getAttribute("src")||"";}).join(" ");
+ var say0=document.querySelectorAll(".speech .ln").length;
+ var port0=Array.prototype.map.call(document.querySelectorAll(".speech img"),function(n){return n.getAttribute("src")||"";}).join(" ");
  var ch=document.getElementById("hCh").textContent||"";
  var heads=document.querySelectorAll("#box h2, #box h3").length;
  var metersIn=!!document.querySelector("#hud #meters");
@@ -1902,8 +1916,8 @@ refreshCont();
  Story.go("roof");render();
  var bgRoof=document.getElementById("bg").getAttribute("data-k");
  var huntTxt=document.getElementById("txt").innerText||"";
- var portHunt=Array.prototype.map.call(document.querySelectorAll(".bubble.npc img"),function(n){return n.getAttribute("src")||"";}).join(" ");
- var sayHunt=document.querySelectorAll(".bubble.npc").length;
+ var portHunt=Array.prototype.map.call(document.querySelectorAll(".speech img"),function(n){return n.getAttribute("src")||"";}).join(" ");
+ var sayHunt=document.querySelectorAll(".speech .ln").length;
  var bad=/墨海晴|同居|伴侶|女朋友|長姐之愛|走失的妹|失散的妹|儲物間|麻繩|刀片|割腕|血痂/;
  newGame();Story.opening();render();
  var placeBefore=S.place;
@@ -1925,7 +1939,7 @@ refreshCont();
  var sumEl=document.getElementById("sum").textContent||"";
  var chEl2=document.getElementById("choices").innerText||"";
  var meter2=document.getElementById("meters").innerText||"";
- var saySil=document.querySelectorAll(".bubble.npc").length;
+ var saySil=document.querySelectorAll(".speech .ln").length;
  var ph=document.getElementById("free").getAttribute("placeholder")||"";
  sheetPeople();
  var snapEl=document.getElementById("shB").innerText||"";
@@ -1933,11 +1947,12 @@ refreshCont();
  var narEl=Array.prototype.map.call(document.querySelectorAll(".stage"),function(n){return n.textContent;}).join("\n");
  var countHidden=document.getElementById("count").hidden;
  var modeBtn=(document.getElementById("mode").textContent||"");
- var silenceOk=/風險|未解/.test(sumEl)&&/【/.test(chEl2)&&modeBtn==="說"&&/身體/.test(meter2)&&/語言/.test(meter2)&&/心緒/.test(meter2)&&/信任/.test(meter2)&&/陳海柔/.test(snapEl)&&/墨星辰/.test(snapEl)&&/歐海辰/.test(snapEl)&&saySil>=2&&heads===0&&metersIn&&!document.getElementById("bars")&&countHidden&&!document.querySelector("#box h2")&&document.querySelectorAll(".bubble.me").length>=1;
+ var youEl=document.querySelector(".yousaid");
+ var silenceOk=/風險|未解/.test(sumEl)&&/【/.test(chEl2)&&modeBtn==="說"&&/身體/.test(meter2)&&/語言/.test(meter2)&&/心緒/.test(meter2)&&/信任/.test(meter2)&&/陳海柔/.test(snapEl)&&/墨星辰/.test(snapEl)&&/歐海辰/.test(snapEl)&&saySil>=2&&heads===0&&metersIn&&!document.getElementById("bars")&&countHidden&&!document.querySelector("#box h2")&&!!youEl&&/你說/.test(youEl.textContent)&&!document.querySelector(".bubble");
  var leak2=/墨海晴|同居|伴侶|女朋友|長姐之愛/.test(boxEl);
  var youOk=!/(^|[^「])我/.test(narEl);
  var info={
-  build:"xc-chat-1008",
+  build:"xc-room-1008",
   chapter:/第一章/.test(ch)&&/第一章/.test(openTxt)&&/刀刃與界限/.test(openTxt),
   counsel:bg0==="counsel"&&/諮商室/.test(openTxt)&&/陳海柔/.test(openTxt),
   form:/記錄|數字/.test(openTxt)&&/不是強制入院/.test(openTxt)&&/敲門/.test(openTxt),
@@ -1955,7 +1970,7 @@ refreshCont();
   sayHunt:sayHunt,
   saySil:saySil
  };
- info.chat=say0>=2&&openNar.length<80;
+ info.chat=say0>=2&&openNar.length<80&&!document.querySelector(".bubble");
  var pass=info.chapter&&info.counsel&&info.form&&info.bgSwap&&info.hunt&&info.portraits&&!info.leak&&info.sayStayed&&info.didMoved&&info.setOk&&info.silenceOk&&!info.leak2&&info.youOk&&info.chat;
  document.getElementById("testResult").textContent=JSON.stringify(info);
  document.title="XC "+(pass?"PASS":"FAIL");
