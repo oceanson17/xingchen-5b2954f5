@@ -93,7 +93,7 @@ function render(){
   var key=sceneBgKey();
   if(bg.getAttribute("data-k")!==key){
    bg.setAttribute("data-k",key);
-   bg.style.backgroundImage="url('assets/bg_"+key+".webp?v=thin2')";
+   bg.style.backgroundImage="url('assets/bg_"+key+".webp?v=early')";
   }
  }
  renderMeters();
