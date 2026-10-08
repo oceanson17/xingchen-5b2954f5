@@ -14,11 +14,11 @@ function renderChips(){
  box.innerHTML=h;
 }
 function syncPlaceholder(){
- var ph={"說":"E.【自由輸入】","做":"E.【自由輸入】做一件事，或 /指令","設定":"E.【自由輸入】寫下一件已經成立的事"};
+ var ph={"說":"回她一句","做":"做一件事，或 /指令","設定":"寫下一件已經成立的事"};
  var inp=document.getElementById("free");
  var mode=document.getElementById("mode");
  if(mode)mode.textContent=Story.mode;
- if(inp)inp.placeholder=ph[Story.mode]||"E.【自由輸入】";
+ if(inp)inp.placeholder=ph[Story.mode]||"回她一句";
 }
 function avatarHtml(id){
  var p=P(id)||PEOPLE[id]||{n:id,color:"#9bb"};
@@ -99,35 +99,37 @@ function render(){
  renderMeters();
  renderTurn();
  var html="";
- (S.view.lines||[]).forEach(function(l){
-  if(l.player||l.sp==="haichen"){html+='<p class="me">'+esc(l.t)+"</p>";return;}
+ var src=(S.log&&S.log.length)?S.log:(S.view.lines||[]);
+ src.forEach(function(l){
+  if(l.player||l.sp==="haichen"){
+   html+='<div class="bubble me" data-side="me"><div class="bk"><div class="nm">你</div><div class="ln">'+esc(l.t)+"</div></div></div>";
+   return;
+  }
   if(!l.sp){
    if(/^第.+章/.test(l.t))html+='<p class="chap">'+esc(l.t)+"</p>";
-   else html+='<p class="nar">'+esc(l.t)+"</p>";
+   else html+='<p class="stage">'+esc(l.t)+"</p>";
    return;
   }
   var p=P(l.sp)||PEOPLE[l.sp]||{n:l.sp,color:"#9bb"};
-  html+='<div class="say"><div>'+avatarHtml(l.sp)+'</div><div class="sk"><div class="nm" style="color:'+esc(p.color||"#9bb")+'">'+esc(p.n||"")+'</div><div class="ln">'+esc(l.t)+"</div></div></div>";
+  html+='<div class="bubble npc" data-side="npc" data-who="'+esc(l.sp)+'">'+avatarHtml(l.sp)+'<div class="bk"><div class="nm" style="color:'+esc(p.color||"#9bb")+'">'+esc(p.n||"")+'</div><div class="ln">'+esc(l.t)+"</div></div></div>";
  });
  document.getElementById("txt").innerHTML=html;
  var ch=document.getElementById("choices");ch.innerHTML="";
- var letters="ABCD";
  (S.view.ch||[]).slice(0,5).forEach(function(c,i){
   var b=document.createElement("button");b.type="button";
   var tag=c.tag||"探索";
-  var mark=i<4?(letters.charAt(i)+"."):"";
-  b.innerHTML=(mark?'<span class="tag">'+mark+"【"+esc(tag)+"】</span>":'<span class="tag">【'+esc(tag)+"】</span>")+esc(c.t);
+  b.innerHTML='<span class="tag">【'+esc(tag)+"】</span>"+esc(c.t);
   b.dataset.i=String(i);
   b.addEventListener("click",function(){
    var cur=S.view.ch[i];if(!cur)return;
-   Story.act(cur.act);render();
-   var box=document.getElementById("box");if(box)box.scrollTop=0;
+   var act=cur.act;if(act)act.label=cur.t;
+   Story.act(act);render();
   });
   ch.appendChild(b);
  });
  renderChips();
  syncPlaceholder();
- var box=document.getElementById("box");if(box)box.scrollTop=0;
+ var box=document.getElementById("box");if(box)box.scrollTop=box.scrollHeight;
 }
 function afterScene(){render();}
 function submitText(){
@@ -182,7 +184,7 @@ function sheetMenu(){
  h+='<button class="row" id="mSave" type="button"><b>存檔</b><small>寫入這部瀏覽器</small></button>';
  h+='<button class="row" id="mTitle" type="button"><b>回標題</b><small>進度已自動存</small></button>';
  h+='<button class="row" id="mSet" type="button"><b>AI 設定</b><small>'+(SET.ai?"已啟用":"未啟用")+"</small></button>";
- h+='<p class="logl">「說」只是說話。「做」和 /指令 會真的發生。/設定 已經成立。「...」或沉默，在場的人仍會先動。人物快照在「人物」。</p>';
+ h+='<p class="logl">他們在跟你說話。「說」只是回一句。「做」和 /指令 會真的發生。/設定 已經成立。只打「...」，對方會把話接下去。人物在「人物」。</p>';
  openSheet("選單",h);
  document.getElementById("mPeople").onclick=function(){sheetPeople();};
  document.getElementById("mSave").onclick=function(){saveGame(false);};
