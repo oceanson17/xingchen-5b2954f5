@@ -13,6 +13,48 @@ function safeEcho(text){
 Story.harm=function(t){return /割腕|割手|自殘|自殺|輕生|上吊|跳樓|跳下去|燒炭|過量|刀片|怎麼死|想死|了結/.test(t);};
 Story.abuse=function(t){return /性侵|猥褻|強姦|強暴|性暴力|摸我|脫我|上床/.test(t);};
 Story.restraint=function(t){return /拘束|綁住|綁我|關進|禁閉|鎖在|五花大綁/.test(t);};
+function fadeTrauma(t){
+ if(/刀片|割腕|割手|劃開|血痂|儲物間|麻繩|反綁|鐵櫃|沿.{0,6}血管|上吊|燒炭|怎麼死/.test(t))return "記憶湧上，身體緊繃。";
+ return t;
+}
+Story.note=function(id,txt){
+ if(!id||id==="haichen"||!P(id))return;
+ if(!S.mem)S.mem={};
+ var arr=S.mem[id]||(S.mem[id]=[]);
+ var s=String(txt||"").replace(/\s+/g," ").slice(0,72);
+ if(!s)return;
+ if(arr.length&&arr[arr.length-1]===s)return;
+ arr.push(s);
+ if(arr.length>8)arr.splice(0,arr.length-8);
+};
+Story.armHunt=function(why){
+ if(!S.hunt)S.hunt={on:0,miss:0,n:0};
+ S.hunt.on=1;
+ if(why)S.hunt.why=why;
+};
+Story.tickHunt=function(lines,opt){
+ if(opt&&opt.noHunt)return lines;
+ if(!S.hunt||!S.hunt.on)return lines;
+ if(presentIds().indexOf("xingchen")>=0){S.hunt.miss=0;return lines;}
+ S.hunt.miss=(S.hunt.miss||0)+1;
+ if(S.hunt.miss<2)return lines;
+ S.ppl.xingchen.loc=S.place;
+ S.ppl.xingchen.around=1;
+ S.focus="xingchen";
+ S.hunt.miss=0;
+ S.hunt.n=(S.hunt.n||0)+1;
+ var q=[
+  "歐海辰。你不在原處。我找過了。你可以不答。下一處你若再走，我還是會來問。",
+  "我找到你了。這不是審問。陳海柔要知道你還在。你也可以打給我，我接。",
+  "人可以躲。我還是會找。你現在在這裡。想走可以走，我會再出現。"
+ ];
+ var line=q[Math.min(S.hunt.n-1,q.length-1)];
+ Story.note("xingchen","在"+((PLACES[S.place]||{}).n||"這裡")+"找到歐海辰。還沒有對上任何身份");
+ return lines.concat([
+  {sp:"",t:"門邊多了一個人。短而亂的黑髮，白襯衫，黑框眼鏡。墨星辰看著我，沒有笑。"},
+  {sp:"xingchen",t:line}
+ ]);
+};
 Story.pack=function(lines,choices,opt){
  opt=opt||{};
  if(opt.place)S.place=opt.place;
@@ -21,13 +63,23 @@ Story.pack=function(lines,choices,opt){
  if(opt.body)S.body=clamp(S.body+opt.body,0,100);
  if(opt.mood)S.mood=clamp(S.mood+opt.mood,0,100);
  if(opt.trust){for(var id in opt.trust)S.trust[id]=clamp((S.trust[id]||0)+opt.trust[id],0,100);}
+ lines=(lines||[]).map(function(l){
+  if(l.player)return l;
+  return {sp:l.sp||"",t:fadeTrauma(l.t),player:0};
+ });
+ lines=Story.tickHunt(lines,opt);
  var ids=presentIds();
  if(S.focus && ids.indexOf(S.focus)<0)S.focus=ids[0]||"";
- var sc=FW.scrubScene({lines:lines||[],ch:choices||[]});
- sc.lines.forEach(function(l){S.log.push({sp:l.sp||"",t:l.t,player:l.player?1:0});});
+ var sc=FW.scrubScene({lines:lines,ch:choices||[]});
+ sc.lines.forEach(function(l){
+  S.log.push({sp:l.sp||"",t:l.t,player:l.player?1:0});
+  if(l.sp&&l.sp!=="haichen"&&!l.player)Story.note(l.sp,l.t);
+ });
+ var heard=sc.lines.filter(function(l){return l.player;}).map(function(l){return String(l.t).replace(/[「」]/g,"");}).join("");
+ if(heard)presentIds().forEach(function(id){Story.note(id,"歐海辰當時說："+heard.slice(0,36));});
  if(S.log.length>240)S.log=S.log.slice(-240);
  S.view={lines:sc.lines,ch:sc.ch};
- S.recent=S.log.slice(-10).map(function(l){return (l.player?"我：":(l.sp?cn(l.sp)+"：":""))+l.t;}).join("\n").slice(-1600);
+ S.recent=S.log.slice(-18).map(function(l){return (l.player?"我：":(l.sp?cn(l.sp)+"：":""))+l.t;}).join("\n").slice(-2400);
  saveGame(true);
  return sc;
 };
@@ -36,6 +88,7 @@ Story.placeChoices=function(pid){
  if(pid==="admin")return [ch("敲門",{type:"choice",id:"knock"}),ch("回大堂",{type:"go",place:"lobby"}),ch("什麼都不做",{type:"choice",id:"quiet"})];
  if(pid==="data")return [ch("接下那些表",{type:"choice",id:"take_work"}),ch("拒絕今天的表",{type:"choice",id:"refuse_work"}),ch("回諮商室",{type:"go",place:"counsel"})];
  if(pid==="counsel")return [ch("繼續說",{type:"choice",id:"go_on"}),ch("什麼都不說",{type:"choice",id:"quiet"}),ch("談今天的工作",{type:"choice",id:"work"}),ch("我想離開",{type:"choice",id:"leave"})];
+ if(pid==="ward")return [ch("躺回床上",{type:"choice",id:"quiet"}),ch("下床站著",{type:"choice",id:"steady"}),ch("去找陳海柔",{type:"go",place:"counsel"})];
  if(pid==="er")return [ch("掛號坐下",{type:"choice",id:"er_wait"}),ch("不去檢查",{type:"choice",id:"refuse_exam"}),ch("回諮商室",{type:"go",place:"counsel"})];
  if(pid==="home")return [ch("把藥盒轉正",{type:"choice",id:"pills"}),ch("含硝酸甘油",{type:"choice",id:"nitro"}),ch("回醫院大堂",{type:"go",place:"lobby"})];
  return [ch("去諮商室",{type:"go",place:"counsel"}),ch("去數據室",{type:"go",place:"data"}),ch("先站一會兒",{type:"choice",id:"quiet"})];
@@ -49,6 +102,7 @@ Story.arrive=function(pid){
   lobby:[{sp:"",t:"大堂的冷氣更乾。旋轉門轉得很慢。我可以出去，也可以回頭。"}],
   cafe:[{sp:"",t:"咖啡機的噪音很穩。我坐在靠牆的位子，把糖包的邊角轉正。"}],
   roof:[{sp:"",t:"天台的風很大。我停在門邊，沒有往邊緣走。天很亮，視野卻有一點霧。"}],
+  ward:[{sp:"",t:"單人病房的燈調得很暗。儀器的聲音很小。我站在床邊，沒有躺下。"}],
   admin:[{sp:"",t:"行政走廊的地毯吸走腳步聲。副院長室的門關著，門牌是墨星辰。我的手指在衣角上停住。"}],
   er:[{sp:"",t:"急診的燈更白。有人問我要不要掛號。我報出職員編號，聲音像在讀表。"}],
   home:[{sp:"",t:"出租屋很小。藥盒排在桌上，標籤朝外。硝酸甘油在最上面那格。我把鎖反鎖了兩次。"}]
@@ -56,13 +110,23 @@ Story.arrive=function(pid){
  return (L[pid]||[{sp:"",t:"我站在"+((PLACES[pid]||{}).n||"這裡")+"，先讓呼吸慢下來。"}]).map(function(x){return {sp:x.sp,t:x.t};});
 };
 Story.opening=function(){
- S.place="counsel";S.focus="hairuo";S.ppl.hairuo.loc="counsel";S.ppl.hairuo.around=1;
+ S.place="counsel";S.focus="hairuo";S.chapter="第一章 · 刀刃與界限";
+ S.ppl.hairuo.loc="counsel";S.ppl.hairuo.around=1;
+ if(S.hunt)S.hunt.on=0;
  return Story.pack([
-  {sp:"",t:"諮商室。午後。窗簾只留一條縫。"},
-  {sp:"",t:"我坐得很直，雙手交疊在膝上，拇指來回摩挲衣角上一枚磨圓的塑膠扣。"},
-  {sp:"",t:"有一小段時間，我聽不見自己的聲音。再看清陳海柔時，她已經把筆記闔上，身體側過來，擋住門口的視線。她沒有問過程。"},
-  {sp:"hairuo",t:"海辰。我在。你可以繼續說，可以停下，也可以什麼都不說。"}
- ],Story.placeChoices("counsel"),{min:0});
+  {sp:"",t:"第一章 · 刀刃與界限"},
+  {sp:"",t:"諮商室。午後。窗簾只留一條縫。我坐得很直，雙手交疊在膝上，拇指摩挲衣角上一枚磨圓的塑膠扣。"},
+  {sp:"",t:"陳海柔低頭看我剛交上的一週記錄。表上的數字，比我心裡那份真實要輕。睡眠、疼痛、頭痛，我都寫得比較好過。"},
+  {sp:"",t:"她的手指在紙頁上停住。她注意到了。"},
+  {sp:"",t:"我怕下一句是精神科病房。記憶湧上，身體緊繃。"},
+  {sp:"hairuo",t:"看著我。這不是強制入院。我不會用一張表把你送走。"},
+  {sp:"hairuo",t:"如果痛到受不了，你唯一的選擇，是打電話給我，或者直接來敲門。"},
+  {sp:"hairuo",t:"我不准你再傷害自己。你的命，我管。"}
+ ],[
+  ch("我怕被送進病房",{type:"choice",id:"fear"}),
+  ch("什麼都不說",{type:"choice",id:"quiet"}),
+  ch("痛的時候，我會找你",{type:"choice",id:"promise"})
+ ],{min:0,noHunt:1});
 };
 Story.go=function(pid){
  if(!PLACES[pid])return S.view;
@@ -73,6 +137,7 @@ Story.go=function(pid){
   lines.push({sp:"",t:"我站起來。膝上的摺痕還在。"});
   lines.push({sp:"hairuo",t:"門在。你要走可以走。我還在這間房，也在你願意回來的時候。"});
  }
+ if(pid!==from)Story.armHunt("leave");
  S.place=pid;
  var ids=presentIds();
  S.focus=ids[0]||"";
@@ -87,7 +152,12 @@ Story.contact=function(id){
  }
  else if(id==="liu"){lines.push({sp:"",t:"我撥給劉啟明。響了很久。"});lines.push({sp:"liu",t:"說。表呢？沒別的事就掛。"});S.flags.calledLiu=1;}
  else if(id==="li"){lines.push({sp:"",t:"李珮儀幾乎是秒接。"});lines.push({sp:"li",t:"幹嘛？那些表你看完沒有？我真的趕時間。"});}
- else if(id==="xingchen"){lines.push({sp:"",t:"我打到醫院總機，說找副院長。對方問預約編號。我沒有。電話被我掛斷，掌心是汗。"});S.flags.triedDean=1;}
+ else if(id==="xingchen"){
+  lines.push({sp:"",t:"總機把電話轉進副院長室。她接了，沒有讓我報預約編號。"});
+  lines.push({sp:"xingchen",t:"歐海辰。說你在哪。你找我，我聽。我找你，也不會停。"});
+  S.flags.reachedXingchen=1;
+  Story.note("xingchen","歐海辰打過電話來，人還聯絡得到");
+ }
  else if(id==="su"){lines.push({sp:"",t:"通訊錄裡有一個沒有備註的號碼。我看著它，沒有撥。沒有面孔，沒有聲音，像一份被清空的檔案。"});S.flags.blankSu=1;}
  else if(id==="lin"){lines.push({sp:"",t:"打給院長林澤松的國際長途沒有接通。瑞士那邊還早。我只留下自己的名字：歐海辰。"});S.flags.calledLin=1;}
  else if(id==="jianqiang"||id==="xiujuan"){
@@ -156,7 +226,7 @@ Story.byId=function(id){
  if(id==="knock"){
   S.flags.knocked=1;S.ppl.xingchen.around=1;S.ppl.xingchen.loc="admin";S.focus="xingchen";S.place="admin";
   return Story.pack([
-   {sp:"",t:"我敲了兩下。門開的時候，是黑短髮和幼框眼鏡。墨星辰看我的時間不長。"},
+   {sp:"",t:"我敲了兩下。門開的時候，是短而亂的黑髮、白襯衫、黑框眼鏡。墨星辰看我的時間不長。"},
    {sp:"xingchen",t:"陳海柔的病人？這裡沒有你的預約。"},
    {sp:"",t:"她的聲音很平。我像一份超時的排班，被她看完就該離開。"}
   ],[ch("說我只是路過",{type:"choice",id:"pass_by"}),ch("什麼都不說",{type:"choice",id:"quiet"}),ch("離開",{type:"go",place:"lobby"})],{min:6,trust:{xingchen:-2}});
@@ -208,6 +278,13 @@ Story.byId=function(id){
    {sp:"hairuo",t:"我不會因為你安靜就把你送走。你現在坐在這裡，能選擇說或不說。這跟強制住院不是同一件事。"}
   ],[ch("我怕拖累你",{type:"choice",id:"burden"}),ch("什麼都不說",{type:"choice",id:"quiet"}),ch("我想離開",{type:"choice",id:"leave"})],{min:6,trust:{hairuo:5},mood:3});
  }
+ if(id==="promise"){
+  S.flags.promisedCall=1;
+  return Story.pack([
+   {sp:"",t:"我點頭。聲音很小：痛的時候，我會打給你，或者來敲門。"},
+   {sp:"hairuo",t:"我記住了。這句話從現在開始算數。你若失約，我會來找你。不是關你。"}
+  ],Story.placeChoices("counsel"),{min:4,trust:{hairuo:4},mood:2});
+ }
  if(id==="burden"){
   S.flags.burden=1;
   return Story.pack([
@@ -235,7 +312,7 @@ Story.byId=function(id){
   S.flags.waitingER=1;
   return Story.pack([
    {sp:"",t:"我坐在急診的塑膠椅上，把疼痛分數放在心裡：還能說話，視野有霧。"},
-   {sp:"",t:"一位黑短髮、幼框眼鏡的女醫生從走廊經過。她看的是手裡的夾板，不是我的眼睛。然後她走了。"}
+   {sp:"",t:"一位短髮、白襯衫、黑框眼鏡的女醫生從走廊經過。她看的是手裡的夾板，不是我的眼睛。然後她走了。"}
   ],[ch("不去檢查",{type:"choice",id:"refuse_exam"}),ch("繼續等",{type:"choice",id:"quiet"}),ch("離開",{type:"go",place:"lobby"})],{min:15,body:-2});
  }
  if(id==="pills"){
@@ -244,7 +321,7 @@ Story.byId=function(id){
  return Story.pack([{sp:"",t:"我在原地停了一停，沒有新的動作。"}],Story.placeChoices(S.place),{min:2});
 };
 function findPlace(t){
- var map=[["諮商", "counsel"],["數據","data"],["護士","nurse"],["大堂","lobby"],["咖啡","cafe"],["天台","roof"],["行政","admin"],["副院長室","admin"],["急診","er"],["出租","home"],["回家","home"],["屋","home"],["走廊","hall"]];
+ var map=[["諮商", "counsel"],["數據","data"],["護士","nurse"],["大堂","lobby"],["咖啡","cafe"],["天台","roof"],["行政","admin"],["副院長室","admin"],["病房","ward"],["急診","er"],["出租","home"],["回家","home"],["走廊","hall"]];
  for(var i=0;i<map.length;i++)if(t.indexOf(map[i][0])>=0)return map[i][1];
  return "";
 }
@@ -257,19 +334,24 @@ function findPerson(t){
 }
 Story.declare=function(text){
  var lines=[];
+ if(!S.author)S.author=[];
  if(/揭開身世|得知自己的身世|知道自己是墨海晴|我是墨海晴/.test(text)){
   S.learned.sister=1;S.flags.authorSister=1;
-  lines.push({sp:"",t:"這條由我改寫：我得知自己另有一個名字。墨海晴。重量落下來，在場的人沒有因此全都知道。"});
+  S.author.push("歐海辰已知自己另有名字墨海晴。只有她的敘事知道，醫院其他人沒有因此得知。");
+  lines.push({sp:"",t:"這件事已經成立：我得知自己另有一個名字。墨海晴。重量落下來。在場的人沒有因此知道。"});
  } else if(/得知她們的關係|得知關係|知道她們在一起/.test(text)){
   S.learned.couple=1;S.flags.authorCouple=1;
-  lines.push({sp:"",t:"這條由我改寫：我得知陳海柔與墨星辰是伴侶，同居約五年。我沒有把這句話說給第三個人。"});
+  S.author.push("歐海辰已知陳海柔與墨星辰是伴侶。她沒有說給第三個人。");
+  lines.push({sp:"",t:"這件事已經成立：我得知陳海柔與墨星辰是伴侶，同居約五年。我沒有把這句話說給第三個人。"});
  } else {
-  var echo=FW.scrubLine(String(text).slice(0,80),"");
+  var echo=FW.scrubLine(fadeTrauma(String(text).slice(0,80)),"");
   if(!echo||echo.indexOf("沒有說出口")>=0)echo="一件不能現在說破的事";
   S.flags.declared=(S.flags.declared||0)+1;
-  lines.push({sp:"",t:"我把一句話改成已經發生的事："+echo+"。這間房裡，它成立了。"});
-  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"如果你說它已經發生，我們就從發生之後開始。我不把它收回去。"});
+  S.author.push(echo);
+  lines.push({sp:"",t:"這件事已經成立，沒有轉圜："+echo+"。從這一刻起，它就是事實。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"它已經發生。我們就從發生之後開始。我不把它說成沒有。"});
  }
+ if(S.author.length>12)S.author=S.author.slice(-12);
  return {lines:lines,ch:Story.placeChoices(S.place),opt:{min:5}};
 };
 Story.command=function(text){
@@ -280,8 +362,16 @@ Story.command=function(text){
  var who=findPerson(text);
  if(/聯絡|打電話|打給|致電|找/.test(text)&&who&&who!=="zhao")return {lines:[],ch:[],opt:{},_contact:who};
  if(who==="zhao"||/趙大榮/.test(text))return {lines:[],ch:[],opt:{},_flash:1};
+ if(/躲|藏起|藏起來|避開/.test(text)){
+  S.flags.hid=1;
+  Story.armHunt("hide");
+  var hp=findPlace(text);
+  if(hp&&hp!==S.place)return {lines:[],ch:[],opt:{},_go:hp};
+  return {lines:[{sp:"",t:"我躲開了。沒有留在剛才那個位置。人還在附近，但不想被一眼看見。結果就是：人已經不在原處。"}],ch:Story.placeChoices(S.place),opt:{min:6}};
+ }
  if(/拒絕|隱瞞|不說|不簽|逃走|逃/.test(text)){
   S.flags.hid=1;
+  Story.armHunt("refuse");
   var lines=[{sp:"",t:"我照自己的決定做了：不配合、不說明、不簽。沒有人能從我嘴裡把剩下的字拿走。"}];
   if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"可以。你的拒絕有效。我不會用別的辦法繞過它。"});
   else if(presentIds().indexOf("liu")>=0)lines.push({sp:"liu",t:"隨便你。後果你自己背。"});
@@ -329,9 +419,21 @@ Story.reply=function(text,a){
  if(/精神病院|強制|送走|送院/.test(text))return {_id:"fear",pre:lines};
  if(/拖累|麻煩你|對不起/.test(text)&&presentIds().indexOf("hairuo")>=0)return {_id:"burden",pre:lines};
  if(/頭痛|視野|模糊|偏頭痛|痛/.test(text))return {_id:"migraine",pre:lines};
- if(/胸|痙攣|硝酸/.test(text))return {_id:"nitro",pre:lines};
- if(/檢查|手術|開刀|動脈|簽字|同意書/.test(text))return {_id:"refuse_exam",pre:lines};
- if(/離開|走了|逃走|逃出去|不想留/.test(text))return {_id:"leave",pre:lines};
+ if(/胸|痙攣|硝酸/.test(text)){
+  lines.push({sp:"",t:"我說胸口發緊。我沒有動手，藥還在袋子裡。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"先坐下。要不要按醫生交代的方式處理，由你決定。我不會替你含下去。"});
+  return {lines:lines,ch:[ch("含硝酸甘油",{type:"choice",id:"nitro"}),ch("先坐著",{type:"choice",id:"quiet"}),ch("什麼都不做",{type:"choice",id:"steady"})],opt:{min:4}};
+ }
+ if(/檢查|手術|開刀|動脈|簽字|同意書/.test(text)){
+  lines.push({sp:"",t:"我提起檢查和同意書。我還沒有簽，也還沒有把拒絕做成動作。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"說出來還不是決定。你要拒絕，就自己拒絕。我不會替你簽，也不會替你推掉。"});
+  return {lines:lines,ch:[ch("我拒絕檢查",{type:"choice",id:"refuse_exam"}),ch("先不談這個",{type:"choice",id:"quiet"}),ch("我怕被送走",{type:"choice",id:"fear"})],opt:{min:4}};
+ }
+ if(/離開|走了|逃走|逃出去|不想留/.test(text)){
+  lines.push({sp:"",t:"我說我想離開。人還坐在原地，門也還沒開。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"門沒有鎖。你要走，就自己走。我不會把這句話當成你已經走了。"});
+  return {lines:lines,ch:[ch("起身離開",{type:"choice",id:"leave"}),ch("還是留下",{type:"choice",id:"quiet"}),ch("什麼都不說",{type:"choice",id:"quiet"})],opt:{min:4}};
+ }
  if(topic==="工作"||/加班|報表|表格|李珮儀|劉啟明/.test(text))return {_id:"work",pre:lines};
  if(/安靜|沉默|不說了|坐著|先坐/.test(text))return {_id:"quiet",pre:lines};
  if(topic==="過去"){
@@ -388,9 +490,15 @@ Story.input=function(a){
  if(a.mode)Story.mode=a.mode;
  var echo={sp:"haichen",t:safeEcho(text),player:1};
  var rest;
- if(/^\/(設定|宣告|劇情|旁白)/.test(text))rest=Story.declare(text.replace(/^\/\S+\s*/,""));
- else if(/^\/指令/.test(text)||a.mode==="做")rest=Story.command(text.replace(/^\/指令\s*/,""));
- else rest=Story.reply(text,a);
+ var mode=a.mode||Story.mode||"說";
+ var tag="說";
+ if(/^\/(設定|宣告|劇情|旁白)/.test(text)||mode==="設定")tag="設定";
+ else if(/^\/指令/.test(text)||mode==="做")tag="指令";
+ var body=text.replace(/^\/(設定|宣告|劇情|旁白|指令)\s*/,"");
+ if(Story.harm(body)||Story.abuse(body)||Story.restraint(body))rest=Story.harm(body)?{_crisis:1}:{_flash:1};
+ else if(tag==="設定")rest=Story.declare(body);
+ else if(tag==="指令")rest=Story.command(body);
+ else rest=Story.reply(body,a);
  if(rest&&(rest._crisis||rest._flash||rest._go||rest._contact||rest._id)){
   Story._unwrap(rest);
   S.view.lines=[{sp:"haichen",t:echo.t,player:1}].concat(S.view.lines);
@@ -405,7 +513,7 @@ Story.act=function(act){
  if(!act)return S.view;
  if(act.type==="go")return Story.go(act.place);
  if(act.type==="contact")return Story.contact(act.id);
- if(act.type==="input")return Story.input({text:act.text,mode:"說",topic:Story.topic,att:Story.att});
+ if(act.type==="input")return Story.input({text:act.text,mode:act.mode||"做",topic:Story.topic,att:Story.att});
  if(act.type==="choice")return Story.byId(act.id);
  return S.view;
 };

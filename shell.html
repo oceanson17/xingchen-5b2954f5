@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#10181c">
+<meta name="xc-build" content="xc-ch1-glasses-860">
 <title>星辰之海</title>
 <style>
 /*@@CSS@@*/
@@ -17,14 +18,16 @@
   <div class="mark">聖瑞</div>
   <h1>星辰之海</h1>
   <p class="sub">第一身 · 歐海辰</p>
-  <button class="tbtn" id="tNew"><b>開始記錄</b><small>諮商室 · 第 1 日午後</small></button>
+  <button class="tbtn" id="tNew"><b>開始記錄</b><small>第一章 · 刀刃與界限</small></button>
   <button class="tbtn" id="tCont"><b>繼續</b><small>讀取這部手機上的存檔</small></button>
   <button class="tbtn" id="tSet"><b>設定</b><small>xAI Grok · 自己的 API Key</small></button>
   <p class="foot">沒有 Key 也能玩，斷線會改走離線劇情。創傷情節只會淡出，不會寫成步驟。存檔只留在這部瀏覽器。</p>
  </section>
  <section id="game" class="scr">
+  <div id="bg" data-k=""></div>
+  <div id="char" hidden><img id="charImg" alt=""></div>
   <header id="hud">
-   <div class="plc"><div id="hPlace">諮商室</div><div id="hFloor">聖瑞醫院</div></div>
+   <div class="plc"><div id="hCh">第一章 · 刀刃與界限</div><div id="hPlace">諮商室</div><div id="hFloor">聖瑞醫院</div></div>
    <div id="hTime">第1日 15:00</div>
    <button id="hMenu" type="button">選單</button>
   </header>
@@ -34,7 +37,7 @@
    <div id="chips"></div>
    <div id="inrow">
     <button id="mode" type="button">說</button>
-    <input id="free" type="text" maxlength="120" placeholder="想說的話，或 /指令 …" autocomplete="off" enterkeyhint="send">
+    <input id="free" type="text" maxlength="120" placeholder="想說的話。說出口不會被當成命令" autocomplete="off" enterkeyhint="send">
     <button id="send" type="button">送</button>
    </div>
   </div>

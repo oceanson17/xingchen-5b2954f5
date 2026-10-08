@@ -13,12 +13,45 @@ function renderChips(){
  ATTS.forEach(function(t){h+='<button type="button" data-k="att" data-v="'+t+'"'+(Story.att===t?' class="on"':"")+">"+t+"</button>";});
  box.innerHTML=h;
 }
+function portraitNow(){
+ var lines=(S.view&&S.view.lines)||[];
+ var i;
+ for(i=lines.length-1;i>=0;i--){
+  var id=lines[i].sp;
+  if(id&&!lines[i].player&&PORTRAIT[id]&&presentIds().indexOf(id)>=0)return id;
+ }
+ if(S.focus&&PORTRAIT[S.focus]&&presentIds().indexOf(S.focus)>=0)return S.focus;
+ var ids=presentIds();
+ for(i=0;i<ids.length;i++)if(PORTRAIT[ids[i]])return ids[i];
+ return "";
+}
 function render(){
  if(!S||!S.view)return;
  var pl=PLACES[S.place]||{n:"",floor:""};
+ var chEl=document.getElementById("hCh");
+ if(chEl)chEl.textContent=S.chapter||"第一章 · 刀刃與界限";
  document.getElementById("hPlace").textContent=pl.n;
  document.getElementById("hFloor").textContent=pl.floor;
  document.getElementById("hTime").textContent=timeStr();
+ var bg=document.getElementById("bg");
+ if(bg){
+  var key=(typeof PLACE_BG!=="undefined"&&PLACE_BG[S.place])||"lobby";
+  if(bg.getAttribute("data-k")!==key){
+   bg.setAttribute("data-k",key);
+   bg.style.backgroundImage="url('assets/bg_"+key+".webp?v=ch1')";
+  }
+ }
+ var who=portraitNow();
+ var holder=document.getElementById("char");
+ var img=document.getElementById("charImg");
+ if(holder&&img){
+  if(who&&PORTRAIT[who]){
+   var src="assets/"+PORTRAIT[who]+".webp?v=ch1";
+   if(img.getAttribute("src")!==src)img.setAttribute("src",src);
+   img.alt=cn(who);
+   holder.hidden=false;
+  }else holder.hidden=true;
+ }
  document.getElementById("mBody").textContent=S.body;
  document.getElementById("mMood").textContent=S.mood;
  document.getElementById("mTrust").textContent=S.trust.hairuo||0;
@@ -46,6 +79,9 @@ function submitText(){
  if(!text)return;
  inp.value="";
  var a={text:text,mode:Story.mode,topic:Story.topic,att:Story.att,type:"free"};
+ if(Story.harm(text)||Story.abuse(text)||Story.restraint(text)){
+  Story.input(a);render();return;
+ }
  if(AI.ready()){
   busy(true);
   AI.run(a).then(function(){busy(false);render();},function(e){busy(false);Story.input(a);render();toast((AI.errMsg(e))+"，已改用離線劇情");});
@@ -66,7 +102,7 @@ function sheetPlaces(){
  });
 }
 function sheetCalls(){
- var list=[["hairuo","陳海柔","治療師"],["liu","劉啟明","主管"],["li","李珮儀","同事"],["xingchen","醫院總機","找副院長"],["su","沒有備註的號碼","想不起面孔"],["lin","林澤松","院長 · 瑞士"],["jianqiang","歐建強","可以不打"],["xiujuan","梁秀娟","可以不打"]];
+ var list=[["hairuo","陳海柔","治療師"],["liu","劉啟明","主管"],["li","李珮儀","同事"],["xingchen","墨星辰","打給她，她會接"],["su","沒有備註的號碼","想不起面孔"],["lin","林澤松","院長 · 瑞士"],["jianqiang","歐建強","可以不打"],["xiujuan","梁秀娟","可以不打"]];
  var h="";
  list.forEach(function(x){h+='<button class="row" data-id="'+x[0]+'" type="button"><b>'+esc(x[1])+"</b><small>"+esc(x[2])+"</small></button>";});
  openSheet("聯絡",h);
@@ -88,7 +124,7 @@ function sheetMenu(){
  h+='<button class="row" id="mSave" type="button"><b>存檔</b><small>寫入這部瀏覽器</small></button>';
  h+='<button class="row" id="mTitle" type="button"><b>回標題</b><small>進度已自動存</small></button>';
  h+='<button class="row" id="mSet" type="button"><b>AI 設定</b><small>'+(SET.ai?"已啟用":"未啟用")+"</small></button>";
- h+='<p class="logl">/指令 離開、聯絡某人、拒絕。/設定 把一句話改成已發生。秘密不會因為一句閒話傳開。</p>';
+ h+='<p class="logl">「說」只是說話，不會被當成命令。「做」和 /指令 會真的發生，並寫出結果。/設定 或「設定」模式裡的事已經成立，不會被否定。秘密不會因為一句閒話傳開。</p>';
  openSheet("選單",h);
  document.getElementById("mSave").onclick=function(){saveGame(false);};
  document.getElementById("mTitle").onclick=function(){closeSheet();showScr("title");refreshCont();};
@@ -134,7 +170,13 @@ function bind(){
  document.getElementById("sheet").addEventListener("click",function(e){if(e.target.id==="sheet")closeSheet();});
  document.getElementById("send").onclick=submitText;
  document.getElementById("free").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();submitText();}});
- document.getElementById("mode").onclick=function(){Story.mode=Story.mode==="說"?"做":"說";this.textContent=Story.mode;document.getElementById("free").placeholder=Story.mode==="做"?"做一件事，或 /指令 …":"想說的話，或 /指令 …";};
+ document.getElementById("mode").onclick=function(){
+  var seq=["說","做","設定"];
+  var i=seq.indexOf(Story.mode);Story.mode=seq[(i+1)%3];
+  this.textContent=Story.mode;
+  var ph={"說":"想說的話。說出口不會被當成命令","做":"做一件事，或 /指令 …","設定":"寫下一件已經成立的事"};
+  document.getElementById("free").placeholder=ph[Story.mode];
+ };
  document.getElementById("chips").addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
   if(b.dataset.k==="topic")Story.topic=b.dataset.v;

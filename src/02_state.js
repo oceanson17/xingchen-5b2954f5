@@ -1,6 +1,6 @@
 /* ===== 設定、存檔、新局 ===== */
 var S=null;
-var DEFSET={ai:false,key:"",base:"https://api.x.ai/v1",model:"grok-4.7",temp:0.85,maxTok:1800,aiTimeout:45,preset:"xai",firewall:true};
+var DEFSET={ai:false,key:"",base:"https://api.x.ai/v1",model:"grok-4.7",temp:0.85,maxTok:2600,aiTimeout:45,preset:"xai",firewall:true};
 var SET={};
 var PRESETS={
  deepseek:{n:"DeepSeek",base:"https://api.deepseek.com/v1",model:"deepseek-chat",models:["deepseek-chat","deepseek-reasoner"],key:"到 platform.deepseek.com 建立 API Key。"},
@@ -15,7 +15,8 @@ var PRESET_ORDER=["xai","deepseek","openai","openrouter","gemini","groq","custom
 var SET_KEY="xingchen_settings";
 var SAVE_KEY="xingchen_v1_auto";
 function loadSettings(){var o={};try{o=JSON.parse(localStorage.getItem(SET_KEY)||"{}")||{};}catch(e){o={};}
- SET={};for(var k in DEFSET)SET[k]=(o[k]!==undefined&&typeof o[k]===typeof DEFSET[k])?o[k]:DEFSET[k];}
+ SET={};for(var k in DEFSET)SET[k]=(o[k]!==undefined&&typeof o[k]===typeof DEFSET[k])?o[k]:DEFSET[k];
+ if(SET.maxTok===1800||SET.maxTok<2000)SET.maxTok=2600;}
 function saveSettings(){try{localStorage.setItem(SET_KEY,JSON.stringify(SET));}catch(e){}}
 function clamp(v,a,b){v=+v;if(isNaN(v))v=a;return v<a?a:(v>b?b:v);}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
@@ -25,10 +26,10 @@ function timeStr(){var h=Math.floor(S.time/60)%24,m=S.time%60;return "第"+S.day
 function passMin(n){S.time+=n;if(S.time>=24*60){S.time-=24*60;S.day++;}}
 function presentIds(){var a=[];for(var id in S.ppl){if(id==="haichen")continue;var p=S.ppl[id];if(p.around&&p.loc===S.place)a.push(id);}return a;}
 function newGame(){
- S={v:1,day:1,time:15*60,place:"counsel",focus:"hairuo",learned:{},flags:{},log:[],recent:"",trust:{},body:62,mood:44,nitro:3,ppl:{},view:null};
+ S={v:1,day:1,time:15*60,place:"counsel",focus:"hairuo",chapter:"第一章 · 刀刃與界限",learned:{},flags:{},log:[],recent:"",trust:{},body:62,mood:44,nitro:3,ppl:{},view:null,mem:{},hunt:{on:0,miss:0,n:0},author:[],aiHist:[]};
  for(var id in PEOPLE){var p=PEOPLE[id];S.ppl[id]={n:p.n,role:p.role,loc:p.loc,around:p.around?1:0,color:p.color,g:p.g,age:p.age};S.trust[id]=id==="hairuo"?36:id==="li"?12:id==="liu"?8:20;}
  S.trust.haichen=0;
 }
 function saveGame(quiet){if(!S)return false;try{localStorage.setItem(SAVE_KEY,JSON.stringify({t:Date.now(),s:S}));if(!quiet&&typeof toast==="function")toast("已存檔");return true;}catch(e){if(!quiet&&typeof toast==="function")toast("存檔失敗");return false;}}
 function hasSave(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}}
-function loadGame(){try{var o=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");if(!o||!o.s||o.s.v!==1)return false;S=o.s;if(!S.learned)S.learned={};if(!S.flags)S.flags={};if(!S.log)S.log=[];return true;}catch(e){return false;}}
+function loadGame(){try{var o=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");if(!o||!o.s||o.s.v!==1)return false;S=o.s;if(!S.learned)S.learned={};if(!S.flags)S.flags={};if(!S.log)S.log=[];if(!S.mem)S.mem={};if(!S.hunt)S.hunt={on:0,miss:0,n:0};if(!S.author)S.author=[];if(!S.aiHist)S.aiHist=[];if(!S.chapter)S.chapter="第一章 · 刀刃與界限";return true;}catch(e){return false;}}

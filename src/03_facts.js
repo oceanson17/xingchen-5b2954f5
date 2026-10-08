@@ -14,6 +14,7 @@ FW.hit=function(text){
 FW.scrubLine=function(text,speaker){
  if(SET.firewall===false)return text;
  var who=speaker||"";
+ var narr=!who||who==="narr"||who==="me"||who==="haichen";
  var parts=splitSent(String(text||""));
  var out=[];
  parts.forEach(function(s){
@@ -21,7 +22,10 @@ FW.scrubLine=function(text,speaker){
   var hits=FW.hit(s);
   var leak=false;
   for(var i=0;i<hits.length;i++){
-   if(!S.learned[hits[i]]){leak=true;break;}
+   var k=hits[i];
+   if(narr){if(!S.learned[k])leak=true;}
+   else if(!FW.knows(who,k)||!S.learned[k])leak=true;
+   if(leak)break;
   }
   if(!leak)out.push(s);
  });
@@ -53,7 +57,7 @@ function aiKnowLine(id){
  var card=PEOPLE[id];if(!card)return "";
  var ks=(card.know||[]).filter(function(k){return true;});
  var labels={sister:"身世真相（開局仍不可對歐海辰說，且她本人尚未對上）",couple:"與伴侶的關係（不可向歐海辰說破）",sisterlove:"對歐海辰不是愛情（不可說破）"};
- if(id==="xingchen")labels.sister="她弄丟過妹妹，但開局還沒有把眼前這個人認出來。不可說破。";
+ if(id==="xingchen")labels.sister="她多年來一直在找一個走失的人，但還沒有把歐海辰認出來。不可說那個人就是歐海辰，不可說出原名。";
  var bits=ks.map(function(k){return labels[k]||k;});
  return cn(id)+"所知（仍不可向玩家角色說破的部分）："+(bits.join("；")||"無須隱瞞的院內秘密");
 }
