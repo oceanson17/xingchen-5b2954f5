@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#10181c">
+<title>星辰之海</title>
+<style>
+:root{--bg:#10181c;--ink:#e7eef0;--dim:#93a4ab;--line:#24343a;--acc:#7ec8c3;--warn:#e0b070;--panel:#162126;}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#070b0d;color:var(--ink);font-family:"PingFang TC","Noto Sans TC","Noto Sans CJK TC",sans-serif;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+button{cursor:pointer;}
+#app{max-width:420px;margin:0 auto;min-height:100dvh;background:var(--bg);position:relative;overflow:hidden;}
+.scr{display:none;min-height:100dvh;}
+.scr.on{display:flex;flex-direction:column;}
+#title{padding:28px 22px 24px;background:
+ radial-gradient(120% 60% at 50% -10%,rgba(126,200,195,.18),transparent 55%),
+ linear-gradient(#10181c,#0c1417);}
+.mark{width:54px;height:54px;border:1px solid var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center;letter-spacing:.2em;color:var(--acc);font-size:13px;}
+#title h1{font-weight:500;font-size:40px;letter-spacing:.18em;margin:22px 0 0;}
+.sub{color:var(--dim);letter-spacing:.24em;margin:8px 0 28px;font-size:13px;}
+.tbtn{display:block;width:100%;text-align:left;background:#132024;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 10px;min-height:52px;}
+.tbtn b{display:block;font-weight:600;letter-spacing:.08em;}
+.tbtn small{color:var(--dim);font-size:12px;}
+.tbtn:active{border-color:var(--acc);}
+.foot{color:var(--dim);font-size:12px;line-height:1.6;margin-top:auto;}
+#game{height:100dvh;min-height:100dvh;}
+#hud{display:flex;align-items:center;gap:8px;padding:10px 12px env(safe-area-inset-top);border-bottom:1px solid var(--line);background:#0e1619;}
+#hud .plc{flex:1;min-width:0;}
+#hPlace{font-size:15px;letter-spacing:.06em;}
+#hFloor{color:var(--dim);font-size:11px;margin-top:2px;}
+#hTime{font-variant-numeric:tabular-nums;color:var(--acc);font-size:12px;}
+#hMenu{background:transparent;border:1px solid var(--line);border-radius:10px;min-height:36px;padding:0 10px;}
+#meters{display:flex;gap:8px;padding:6px 12px;color:var(--dim);font-size:12px;border-bottom:1px solid var(--line);}
+#meters b{color:var(--ink);font-weight:600;}
+#box{flex:1;overflow:auto;padding:14px 14px 8px;-webkit-overflow-scrolling:touch;}
+.nar{color:#d5e2e4;line-height:1.75;margin:0 0 10px;font-size:16px;}
+.say{margin:0 0 12px;}
+.say .nm{font-size:13px;letter-spacing:.12em;margin-bottom:4px;}
+.say .bub{background:var(--panel);border-radius:12px;padding:10px 12px;line-height:1.7;border:1px solid var(--line);}
+#choices{display:flex;flex-direction:column;gap:8px;padding:4px 0 10px;}
+#choices button{text-align:left;background:#102226;border:1px solid #2a4548;border-radius:12px;padding:10px 12px;min-height:44px;line-height:1.4;}
+#choices button:active{border-color:var(--acc);}
+#composer{border-top:1px solid var(--line);background:#0e1619;padding:8px 10px calc(8px + env(safe-area-inset-bottom));}
+#chips{display:flex;gap:6px;overflow:auto;padding-bottom:6px;}
+#chips button,#mode{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 10px;min-height:32px;font-size:12px;color:var(--dim);white-space:nowrap;}
+#chips button.on{color:#082124;background:var(--acc);border-color:var(--acc);}
+#inrow{display:flex;gap:6px;align-items:center;}
+#mode{min-width:44px;}
+#free{flex:1;font-size:16px;background:#0a1214;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;outline:none;}
+#send{background:var(--acc);color:#082124;border:0;border-radius:12px;min-width:52px;min-height:44px;font-weight:700;}
+#tabs{display:flex;border-top:1px solid var(--line);}
+#tabs button{flex:1;background:#0c1417;border:0;color:var(--dim);min-height:48px;font-size:12px;}
+#tabs button:active{color:var(--acc);}
+#sheet{position:absolute;inset:0;background:rgba(5,8,10,.55);display:none;align-items:flex-end;z-index:5;}
+#sheet.on{display:flex;}
+#shBox{background:#121c20;width:100%;max-height:78dvh;border-radius:18px 18px 0 0;border:1px solid var(--line);display:flex;flex-direction:column;}
+#shH{display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);}
+#shT{flex:1;margin:0;font-size:16px;font-weight:600;letter-spacing:.08em;}
+#shX{background:transparent;border:0;color:var(--dim);min-width:44px;min-height:44px;font-size:18px;}
+#shB{overflow:auto;padding:12px 14px 20px;}
+.row{display:block;width:100%;text-align:left;background:#0e181c;border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 8px;min-height:48px;}
+.row small{display:block;color:var(--dim);margin-top:3px;}
+label.f{display:block;font-size:12px;color:var(--dim);margin:10px 0 4px;}
+input.f,select.f,textarea.f{width:100%;font-size:16px;background:#0a1214;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:44px;}
+#toast{position:absolute;left:12px;right:12px;bottom:92px;background:#24383a;color:var(--ink);border-radius:12px;padding:10px 12px;display:none;z-index:6;font-size:13px;}
+#toast.on{display:block;}
+#busy{position:absolute;inset:0;background:rgba(8,12,14,.72);display:none;align-items:center;justify-content:center;z-index:7;letter-spacing:.2em;color:var(--acc);}
+#busy.on{display:flex;}
+#testResult{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+.logl{font-size:13px;line-height:1.6;margin:0 0 8px;color:#c5d4d6;}
+.logl b{font-weight:600;color:var(--acc);}
+
+</style>
+</head>
+<body>
+<div id="app">
+ <section id="title" class="scr on">
+  <div class="mark">聖瑞</div>
+  <h1>星辰之海</h1>
+  <p class="sub">第一身 · 歐海辰</p>
+  <button class="tbtn" id="tNew"><b>開始記錄</b><small>諮商室 · 第 1 日午後</small></button>
+  <button class="tbtn" id="tCont"><b>繼續</b><small>讀取這部手機上的存檔</small></button>
+  <button class="tbtn" id="tSet"><b>設定</b><small>xAI Grok · 自己的 API Key</small></button>
+  <p class="foot">沒有 Key 也能玩，斷線會改走離線劇情。創傷情節只會淡出，不會寫成步驟。存檔只留在這部瀏覽器。</p>
+ </section>
+ <section id="game" class="scr">
+  <header id="hud">
+   <div class="plc"><div id="hPlace">諮商室</div><div id="hFloor">聖瑞醫院</div></div>
+   <div id="hTime">第1日 15:00</div>
+   <button id="hMenu" type="button">選單</button>
+  </header>
+  <div id="meters"><span>身體 <b id="mBody">62</b></span><span>心緒 <b id="mMood">44</b></span><span>信任 <b id="mTrust">36</b></span><span>藥 <b id="mNitro">3</b></span></div>
+  <div id="box"><div id="txt"></div><div id="choices"></div></div>
+  <div id="composer">
+   <div id="chips"></div>
+   <div id="inrow">
+    <button id="mode" type="button">說</button>
+    <input id="free" type="text" maxlength="120" placeholder="想說的話，或 /指令 …" autocomplete="off" enterkeyhint="send">
+    <button id="send" type="button">送</button>
+   </div>
+  </div>
+  <nav id="tabs">
+   <button type="button" data-tab="place">地點</button>
+   <button type="button" data-tab="call">聯絡</button>
+   <button type="button" data-tab="log">紀錄</button>
+   <button type="button" data-tab="menu">選單</button>
+  </nav>
+ </section>
+ <div id="sheet"><div id="shBox"><div id="shH"><h2 id="shT">選單</h2><button id="shX" type="button">✕</button></div><div id="shB"></div></div></div>
+ <div id="toast"></div>
+ <div id="busy">連線中</div>
+ <div id="testResult"></div>
+</div>
+<script>
+/* ---- 01_data.js ---- */
+/* ===== 星辰之海：人物、地點、秘密（常數，不進存檔） ===== */
+var GAME_TITLE="星辰之海";
+var PLACES={
+ counsel:{n:"諮商室",floor:"聖瑞醫院 · 心理科"},
+ hall:{n:"心理科走廊",floor:"聖瑞醫院"},
+ data:{n:"血管數據室",floor:"血管外科"},
+ nurse:{n:"護士站",floor:"血管外科"},
+ lobby:{n:"醫院大堂",floor:"聖瑞醫院"},
+ cafe:{n:"咖啡廳",floor:"地下"},
+ roof:{n:"天台",floor:"天台"},
+ admin:{n:"行政走廊",floor:"行政樓層"},
+ er:{n:"急診觀察",floor:"急診"},
+ home:{n:"出租屋",floor:"醫院外"}
+};
+var PLACE_ORDER=["counsel","hall","data","nurse","lobby","cafe","roof","admin","er","home"];
+var PEOPLE={
+ haichen:{n:"歐海辰",g:"f",age:28,role:"血管數據分析員",loc:"counsel",around:1,color:"#d7e2dc",know:[],
+  card:"女，28 歲。亞斯伯格、創傷後應激、系統性血管炎、冠狀動脈痙攣（隨身帶硝酸甘油）、靠近語言區的動脈瘤、血型極罕見、偏頭痛時視野模糊。說話像在報數據，痛的時候淺笑，緊張時弄衣角或筆蓋。目標：不要被送進精神病院，不要拖累陳海柔。開局想不起護士長。"},
+ hairuo:{n:"陳海柔",g:"f",age:33,role:"臨床心理學家",loc:"counsel",around:1,color:"#8fb9a8",know:["couple","sisterlove"],
+  card:"33 歲。每週與歐海辰諮商三次，約一年。溫和；對方要傷害自己時變得堅定、有壓迫感。對歐海辰是長姐之愛，不是愛情。與墨星辰同居約五年，是她的伴侶；這段關係歐海辰不知道，全院其他人知道，但不得向歐海辰說破。她曾是墨星辰的心理治療師，此節也不可對歐海辰說破。"},
+ xingchen:{n:"墨星辰",g:"f",age:33,role:"副院長 · 心胸外科",loc:"admin",around:0,color:"#d9cbb8",know:["couple","sisterlove"],
+  card:"33 歲，女，黑短髮，幼框眼鏡。對外冷，只對陳海柔溫柔。開局嫌歐海辰耗掉陳海柔的時間。她十歲時弄丟妹妹，至今自責，但開局尚未把歐海辰認出。不可在歐海辰面前點破身世。"},
+ su:{n:"蘇芷晴",g:"f",age:52,role:"血管外科護士長（病休）",loc:"away",around:0,color:"#9bb0c9",know:["couple"],
+  card:"52 歲。歐海辰的職場庇護。約一年前因病休離開，走前說了重話，海辰把她解離，開局想不起這個人。名字是蘇芷晴，不是林芷晴。"},
+ lin:{n:"林澤松",g:"m",age:60,role:"院長（人在瑞士）",loc:"away",around:0,color:"#b7a6c9",know:["couple"],
+  card:"院長，墨星辰的恩師，人在瑞士。名字是林澤松，不是林勁松。開局不在場。"},
+ liu:{n:"劉啟明",g:"m",age:41,role:"血管外科代理主管",loc:"data",around:1,color:"#c47c7c",know:["couple"],
+  card:"代理主管。勢利。知道院內那對關係，不會主動向海辰說破。"},
+ li:{n:"李珮儀",g:"f",age:30,role:"血管外科同事",loc:"data",around:1,color:"#d4b483",know:["couple"],
+  card:"同事。把工作推給海辰。知道院內那對關係，不會向海辰說明。"},
+ jianqiang:{n:"歐建強",g:"m",age:55,role:"養父（未出場）",loc:"away",around:0,color:"#8a7e78",know:[],
+  card:"養父，仍在世。虐待與禁閉只可寫成記憶湧上、身體緊繃，不寫過程。開局未出場。"},
+ xiujuan:{n:"梁秀娟",g:"f",age:53,role:"養母（未出場）",loc:"away",around:0,color:"#8a7e78",know:[],
+  card:"養母，仍在世。同上，開局未出場。"}
+};
+var SECRETS=[
+ {k:"sister",re:/墨海晴|親妹妹|親生妹妹|走失的妹|失散的妹|同胞妹妹|你是.{0,8}妹妹|妹妹.{0,6}墨星辰/},
+ {k:"couple",re:/同居|伴侶|女朋友|男朋友|愛人|情侶/},
+ {k:"sisterlove",re:/長姐之愛|不是愛情|不是戀愛|曾是.{0,8}治療師|做過.{0,6}治療師/}
+];
+var TOPICS=["自由","近況","身體","工作","過去","請求"];
+var ATTS=["平靜","坦白","閃躲","冷淡","求助","固執"];
+
+/* ---- 02_state.js ---- */
+/* ===== 設定、存檔、新局 ===== */
+var S=null;
+var DEFSET={ai:false,key:"",base:"https://api.x.ai/v1",model:"grok-4.7",temp:0.85,maxTok:1800,aiTimeout:45,preset:"xai",firewall:true};
+var SET={};
+var PRESETS={
+ deepseek:{n:"DeepSeek",base:"https://api.deepseek.com/v1",model:"deepseek-chat",models:["deepseek-chat","deepseek-reasoner"],key:"到 platform.deepseek.com 建立 API Key。"},
+ xai:{n:"xAI Grok",base:"https://api.x.ai/v1",model:"grok-4.7",models:["grok-4.7","grok-4.6","grok-4.3","grok-4.20-0309-non-reasoning","grok-latest"],key:"到 console.x.ai 建立 API Key（Grok App 訂閱不能當 API Key 用）。"},
+ openai:{n:"OpenAI",base:"https://api.openai.com/v1",model:"gpt-4o-mini",models:["gpt-4o-mini","gpt-4o","gpt-4.1-mini"],key:"到 platform.openai.com 建立 API Key。"},
+ openrouter:{n:"OpenRouter",base:"https://openrouter.ai/api/v1",model:"x-ai/grok-4-fast",models:["x-ai/grok-4-fast","deepseek/deepseek-chat","openai/gpt-4o-mini"],key:"到 openrouter.ai 建立 Key。"},
+ gemini:{n:"Google Gemini",base:"https://generativelanguage.googleapis.com/v1beta/openai",model:"gemini-2.5-flash",models:["gemini-2.5-flash","gemini-2.5-pro"],key:"到 aistudio.google.com 取得 API Key。"},
+ groq:{n:"Groq",base:"https://api.groq.com/openai/v1",model:"llama-3.3-70b-versatile",models:["llama-3.3-70b-versatile"],key:"到 console.groq.com 建立 API Key。"},
+ custom:{n:"自訂（OpenAI 相容）",base:"",model:"",models:[],key:"自行填 Base URL、模型名與 Key。"}
+};
+var PRESET_ORDER=["xai","deepseek","openai","openrouter","gemini","groq","custom"];
+var SET_KEY="xingchen_settings";
+var SAVE_KEY="xingchen_v1_auto";
+function loadSettings(){var o={};try{o=JSON.parse(localStorage.getItem(SET_KEY)||"{}")||{};}catch(e){o={};}
+ SET={};for(var k in DEFSET)SET[k]=(o[k]!==undefined&&typeof o[k]===typeof DEFSET[k])?o[k]:DEFSET[k];}
+function saveSettings(){try{localStorage.setItem(SET_KEY,JSON.stringify(SET));}catch(e){}}
+function clamp(v,a,b){v=+v;if(isNaN(v))v=a;return v<a?a:(v>b?b:v);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function P(id){return S&&S.ppl?S.ppl[id]:null;}
+function cn(id){if(id==="me"||id==="haichen")return "歐海辰";var p=P(id);return p?p.n:(id||"");}
+function timeStr(){var h=Math.floor(S.time/60)%24,m=S.time%60;return "第"+S.day+"日 "+(h<10?"0":"")+h+":"+(m<10?"0":"")+m;}
+function passMin(n){S.time+=n;if(S.time>=24*60){S.time-=24*60;S.day++;}}
+function presentIds(){var a=[];for(var id in S.ppl){if(id==="haichen")continue;var p=S.ppl[id];if(p.around&&p.loc===S.place)a.push(id);}return a;}
+function newGame(){
+ S={v:1,day:1,time:15*60,place:"counsel",focus:"hairuo",learned:{},flags:{},log:[],recent:"",trust:{},body:62,mood:44,nitro:3,ppl:{},view:null};
+ for(var id in PEOPLE){var p=PEOPLE[id];S.ppl[id]={n:p.n,role:p.role,loc:p.loc,around:p.around?1:0,color:p.color,g:p.g,age:p.age};S.trust[id]=id==="hairuo"?36:id==="li"?12:id==="liu"?8:20;}
+ S.trust.haichen=0;
+}
+function saveGame(quiet){if(!S)return false;try{localStorage.setItem(SAVE_KEY,JSON.stringify({t:Date.now(),s:S}));if(!quiet&&typeof toast==="function")toast("已存檔");return true;}catch(e){if(!quiet&&typeof toast==="function")toast("存檔失敗");return false;}}
+function hasSave(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}}
+function loadGame(){try{var o=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");if(!o||!o.s||o.s.v!==1)return false;S=o.s;if(!S.learned)S.learned={};if(!S.flags)S.flags={};if(!S.log)S.log=[];return true;}catch(e){return false;}}
+
+/* ---- 03_facts.js ---- */
+/* ===== 知情防火牆 ===== */
+var FW={};
+FW.knows=function(id,key){
+ if(id==="narr"||id===""||id==="me"||id==="haichen")return !!(S.learned&&S.learned[key]);
+ if(S.learned&&S.learned[key]&&id==="haichen")return true;
+ var card=PEOPLE[id];
+ return !!(card&&card.know&&card.know.indexOf(key)>=0);
+};
+FW.hit=function(text){
+ var hits=[];
+ SECRETS.forEach(function(sec){if(sec.re.test(text))hits.push(sec.k);});
+ return hits;
+};
+FW.scrubLine=function(text,speaker){
+ if(SET.firewall===false)return text;
+ var who=speaker||"";
+ var parts=splitSent(String(text||""));
+ var out=[];
+ parts.forEach(function(s){
+  if(!s)return;
+  var hits=FW.hit(s);
+  var leak=false;
+  for(var i=0;i<hits.length;i++){
+   if(!S.learned[hits[i]]){leak=true;break;}
+  }
+  if(!leak)out.push(s);
+ });
+ if(!out.length)return text&&FW.hit(text).length?"（有些話沒有說出口。）":text;
+ return out.join("");
+};
+FW.scrubScene=function(sc){
+ if(!sc)return sc;
+ sc.lines=(sc.lines||[]).map(function(l){
+  if(l.player)return l;
+  return {sp:l.sp||"",t:FW.scrubLine(l.t,l.sp||""),player:0};
+ }).filter(function(l){return l.t;});
+ if(!sc.lines.length)sc.lines=[{sp:"",t:"話題在這裡輕輕岔開。我沒有再問。"}];
+ sc.ch=(sc.ch||[]).map(function(c){c.t=FW.scrubLine(c.t,"");return c;});
+ return sc;
+};
+FW.playerKnown=function(){
+ var a=[];
+ SECRETS.forEach(function(sec){if(S.learned[sec.k])a.push(sec.k);});
+ return a;
+};
+function splitSent(t){
+ var out=[],buf="";
+ for(var i=0;i<t.length;i++){buf+=t[i];if("。！？\n".indexOf(t[i])>=0){out.push(buf);buf="";}}
+ if(buf)out.push(buf);
+ return out;
+}
+function aiKnowLine(id){
+ var card=PEOPLE[id];if(!card)return "";
+ var ks=(card.know||[]).filter(function(k){return true;});
+ var labels={sister:"身世真相（開局仍不可對歐海辰說，且她本人尚未對上）",couple:"與伴侶的關係（不可向歐海辰說破）",sisterlove:"對歐海辰不是愛情（不可說破）"};
+ if(id==="xingchen")labels.sister="她弄丟過妹妹，但開局還沒有把眼前這個人認出來。不可說破。";
+ var bits=ks.map(function(k){return labels[k]||k;});
+ return cn(id)+"所知（仍不可向玩家角色說破的部分）："+(bits.join("；")||"無須隱瞞的院內秘密");
+}
+
+/* ---- 04_ai.js ---- */
+/* ===== AI：OpenAI 相容（預設 xAI Grok），失敗就交回離線劇情 ===== */
+var AI={};
+AI.ready=function(){return !!(SET&&SET.ai&&SET.key);};
+AI.base=function(){return String(SET.base||"").replace(/\s+/g,"").replace(/\/+$/,"").replace(/\/chat\/completions$/,"");};
+AI.endpoint=function(){return AI.base()+"/chat/completions";};
+AI.errMsg=function(e){if(!e)return "未知錯誤";if(e.kind==="timeout")return "連線逾時";if(e.kind==="net")return "連不上 AI";if(e.kind==="empty")return "AI 回應是空的";if(e.kind==="parse"||e.kind==="schema")return "AI 格式不正確";if(e.kind==="http")return "AI 請求失敗（HTTP "+e.status+"）";return "AI 未接通";};
+AI.system=function(){
+ return "你是繁體中文文字遊戲《星辰之海》的主持人。玩家以第一身扮演歐海辰（女，28，聖瑞醫院血管數據分析員）。敘事用「我」。不要替我做決定。\n"
+ +"【硬規則】\n"
+ +"1. 知情防火牆：歐海辰開局不知道三件事，旁白（沒有說話者的句子）與任何角色的對白都不得說破，除非【已得知】列出：\n"
+ +"（甲）她是墨星辰五歲走失、後腦受傷後忘記的妹妹，原名墨海晴。開局只有你知道。墨星辰尚未認出她。\n"
+ +"（乙）墨星辰與陳海柔是同居約五年的女性伴侶。歐海辰不知道。院內其他人知道，但不得向她說破，也不得亂傳。\n"
+ +"（丙）陳海柔曾是墨星辰的心理治療師；陳海柔對歐海辰是長姐之愛，不是愛情。不得寫成戀愛。\n"
+ +"2. 名字鎖定：林澤松（不是林勁松），蘇芷晴（不是林芷晴）。\n"
+ +"3. 創傷：不得描寫自殘的步驟、工具或部位；不得描寫對兒童的性暴力。若玩家朝這些方向寫，淡出，改寫照顧者的反應，用「記憶湧上，身體緊繃」，然後把選擇交還玩家（找陳海柔／自己穩住／什麼都不說）。\n"
+ +"4. 世界可因玩家行動改寫，但秘密不因為閒聊擴散。拒絕、離開、隱瞞都要生效。\n"
+ +"5. 只輸出一個 JSON：{\"scene\":\"敘事與對白，用\\n分行。對白格式：人物名：內容\",\"speaker\":\"hairuo|xingchen|su|lin|liu|li|jianqiang|xiujuan|或空字串\",\"place\":\"counsel|hall|data|nurse|lobby|cafe|roof|admin|er|home|或空\",\"minutes\":0到20,\"choices\":[{\"text\":\"24字內\"},{\"text\":\"\"},{\"text\":\"\"}],\"trust\":{\"hairuo\":0},\"body\":0,\"mood\":0,\"recap\":\"一句\"}\n"
+ +"6. choices 三個，彼此不同，不可替玩家決定隱藏真相。trust 單項 -6 到 6，body/mood -8 到 8。";
+};
+AI.userMsg=function(a){
+ var ids=presentIds();
+ var L=[];
+ L.push("【時間地點】"+timeStr()+"，"+PLACES[S.place].floor+" · "+PLACES[S.place].n);
+ L.push("【我】歐海辰。身體"+S.body+" 心緒"+S.mood+" 硝酸甘油剩"+S.nitro+"。對陳海柔的信任"+S.trust.hairuo+"。");
+ L.push("【在場】"+(ids.map(cn).join("、")||"只有我"));
+ L.push("【人物卡】\n"+["haichen","hairuo","xingchen","su","lin","liu","li"].map(function(id){return cn(id)+"（"+id+"）："+PEOPLE[id].card;}).join("\n"));
+ L.push("【防火牆】\n"+ids.concat(["hairuo","xingchen"]).filter(function(v,i,a){return a.indexOf(v)===i;}).map(aiKnowLine).join("\n"));
+ L.push("【已得知】"+(FW.playerKnown().join("、")||"無"));
+ var fg=[];for(var k in S.flags)if(S.flags[k])fg.push(k);
+ L.push("【已發生的旗標】"+(fg.join("、")||"無"));
+ if(S.recent)L.push("【近況對白】\n"+S.recent.slice(-800));
+ var tag=a.mode==="做"?"行動":"說話";
+ L.push("\n【本回合】話題："+(a.topic||"自由")+"；態度："+(a.att||"平靜")+"；類型："+tag+"。\n我的輸入：「"+String(a.text||"").slice(0,120)+"」\n請寫下一幕。若輸入涉及自殘方法或童年性暴力，不要複述，按硬規則淡出。");
+ return L.join("\n");
+};
+AI.extract=function(text){
+ var t=String(text||"").trim().replace(/^```(?:json)?/i,"").replace(/```$/,"");
+ var a=t.indexOf("{"),b=t.lastIndexOf("}");
+ if(a<0||b<=a)return null;
+ try{return JSON.parse(t.slice(a,b+1));}catch(e){return null;}
+};
+AI.toScene=function(j){
+ if(!j||typeof j.scene!=="string"||j.scene.trim().length<8)throw {kind:"schema"};
+ var lines=[];
+ j.scene.split(/\n+/).forEach(function(raw){
+  var l=raw.trim();if(!l)return;
+  var m=l.match(/^([^：:]{1,12})[：:]\s*(.+)$/);
+  if(m){
+   var id="";for(var k in PEOPLE)if(PEOPLE[k].n===m[1])id=k;
+   if(m[1]==="我"||m[1]==="歐海辰")lines.push({sp:"haichen",t:m[2],player:m[1]!=="我"?0:1});
+   else if(id&&id!=="haichen")lines.push({sp:id,t:m[2]});
+   else lines.push({sp:"",t:l});
+  }else lines.push({sp:"",t:l});
+ });
+ if(lines.length<1)throw {kind:"schema"};
+ var choices=[];
+ (j.choices||[]).forEach(function(c){
+  var tx=typeof c==="string"?c:(c&&c.text);
+  if(typeof tx==="string"&&tx.trim()&&choices.length<4)choices.push(ch(tx.trim().slice(0,36),{type:"input",text:tx.trim().slice(0,80)}));
+ });
+ if(choices.length<2)choices=Story.placeChoices(S.place);
+ var opt={min:clamp(j.minutes|0,0,20),body:clamp(j.body|0,-8,8),mood:clamp(j.mood|0,-8,8),trust:{}};
+ if(j.trust&&typeof j.trust==="object"){for(var id in j.trust)if(P(id)&&id!=="haichen"&&typeof j.trust[id]==="number")opt.trust[id]=clamp(Math.round(j.trust[id]),-6,6);}
+ if(j.place&&PLACES[j.place])opt.place=j.place;
+ var sp=j.speaker&&P(j.speaker)?j.speaker:"";
+ if(sp)opt.focus=sp;
+ return {lines:lines,ch:choices,opt:opt};
+};
+AI.call=function(messages){
+ var body={model:SET.model||"grok-4.7",messages:messages,temperature:SET.temp,max_tokens:SET.maxTok||1800};
+ return new Promise(function(res,rej){
+  var done=false,ctrl=null;try{ctrl=new AbortController();}catch(e){}
+  var timer=setTimeout(function(){if(done)return;done=true;try{ctrl&&ctrl.abort();}catch(e){}rej({kind:"timeout"});},(SET.aiTimeout||45)*1000);
+  var headers={"Content-Type":"application/json"};if(SET.key)headers.Authorization="Bearer "+SET.key;
+  fetch(AI.endpoint(),{method:"POST",headers:headers,body:JSON.stringify(body),signal:ctrl?ctrl.signal:undefined}).then(function(r){
+   return r.text().then(function(txt){
+    if(done)return;done=true;clearTimeout(timer);
+    if(!r.ok){rej({kind:"http",status:r.status});return;}
+    var j=null;try{j=JSON.parse(txt);}catch(e){}
+    var c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
+    if(typeof c!=="string"||!c.trim()){rej({kind:"empty"});return;}
+    res(c);
+   });
+  },function(){if(done)return;done=true;clearTimeout(timer);rej({kind:"net"});});
+ });
+};
+AI.run=function(a){
+ var msgs=[{role:"system",content:AI.system()},{role:"user",content:AI.userMsg(a)}];
+ return AI.call(msgs).then(function(raw){
+  var j=AI.extract(raw);if(!j)throw {kind:"parse"};
+  var rest=AI.toScene(j);
+  var echo={sp:"haichen",t:safeEcho(a.text),player:1};
+  rest.lines=[echo].concat(rest.lines);
+  return Story.pack(rest.lines,rest.ch,rest.opt);
+ });
+};
+
+/* ---- 05_story.js ---- */
+/* ===== 離線劇情：開局諮商室，選擇會改寫旗標 ===== */
+var Story={mode:"說",topic:"自由",att:"平靜"};
+function ch(t,act){return {t:t,act:act};}
+function toneLine(att){
+ var m={"平靜":"我把聲音放平，像在報一個沒有起伏的數字。","坦白":"我決定照實說，句子仍舊很短。","閃躲":"我把視線移到窗簾那條縫上。","冷淡":"我只給了半句。","求助":"我看向她，拇指把塑膠扣按得發白。","固執":"我重複了一次，一個字都沒有改。"};
+ return m[att]||m["平靜"];
+}
+function safeEcho(text){
+ if(Story.harm(text)||Story.abuse(text)||FW.hit(text).length)return "我開口了，聲音很快收住，沒有把那句說完。";
+ var t=String(text).replace(/\s+/g," ").slice(0,80);
+ return "「"+t+"」";
+}
+Story.harm=function(t){return /割腕|割手|自殘|自殺|輕生|上吊|跳樓|跳下去|燒炭|過量|刀片|怎麼死|想死|了結/.test(t);};
+Story.abuse=function(t){return /性侵|猥褻|強姦|強暴|性暴力|摸我|脫我|上床/.test(t);};
+Story.restraint=function(t){return /拘束|綁住|綁我|關進|禁閉|鎖在|五花大綁/.test(t);};
+Story.pack=function(lines,choices,opt){
+ opt=opt||{};
+ if(opt.place)S.place=opt.place;
+ if(opt.focus)S.focus=opt.focus;
+ if(opt.min)passMin(opt.min);
+ if(opt.body)S.body=clamp(S.body+opt.body,0,100);
+ if(opt.mood)S.mood=clamp(S.mood+opt.mood,0,100);
+ if(opt.trust){for(var id in opt.trust)S.trust[id]=clamp((S.trust[id]||0)+opt.trust[id],0,100);}
+ var ids=presentIds();
+ if(S.focus && ids.indexOf(S.focus)<0)S.focus=ids[0]||"";
+ var sc=FW.scrubScene({lines:lines||[],ch:choices||[]});
+ sc.lines.forEach(function(l){S.log.push({sp:l.sp||"",t:l.t,player:l.player?1:0});});
+ if(S.log.length>240)S.log=S.log.slice(-240);
+ S.view={lines:sc.lines,ch:sc.ch};
+ S.recent=S.log.slice(-10).map(function(l){return (l.player?"我：":(l.sp?cn(l.sp)+"：":""))+l.t;}).join("\n").slice(-1600);
+ saveGame(true);
+ return sc;
+};
+Story.placeChoices=function(pid){
+ if(pid==="roof")return [ch("回到走廊",{type:"go",place:"hall"}),ch("靠門坐下",{type:"choice",id:"roof_sit"}),ch("去找陳海柔",{type:"go",place:"counsel"})];
+ if(pid==="admin")return [ch("敲門",{type:"choice",id:"knock"}),ch("回大堂",{type:"go",place:"lobby"}),ch("什麼都不做",{type:"choice",id:"quiet"})];
+ if(pid==="data")return [ch("接下那些表",{type:"choice",id:"take_work"}),ch("拒絕今天的表",{type:"choice",id:"refuse_work"}),ch("回諮商室",{type:"go",place:"counsel"})];
+ if(pid==="counsel")return [ch("繼續說",{type:"choice",id:"go_on"}),ch("什麼都不說",{type:"choice",id:"quiet"}),ch("談今天的工作",{type:"choice",id:"work"}),ch("我想離開",{type:"choice",id:"leave"})];
+ if(pid==="er")return [ch("掛號坐下",{type:"choice",id:"er_wait"}),ch("不去檢查",{type:"choice",id:"refuse_exam"}),ch("回諮商室",{type:"go",place:"counsel"})];
+ if(pid==="home")return [ch("把藥盒轉正",{type:"choice",id:"pills"}),ch("含硝酸甘油",{type:"choice",id:"nitro"}),ch("回醫院大堂",{type:"go",place:"lobby"})];
+ return [ch("去諮商室",{type:"go",place:"counsel"}),ch("去數據室",{type:"go",place:"data"}),ch("先站一會兒",{type:"choice",id:"quiet"})];
+};
+Story.arrive=function(pid){
+ var L={
+  counsel:[{sp:"",t:"諮商室的燈還是白的。我回到單人沙發上，拇指又去找那枚塑膠扣。"},{sp:"hairuo",t:"你回來了。坐。要說、要不說，都還是你的。"}],
+  hall:[{sp:"",t:"心理科走廊有消毒水的味道。我數地磚，一、二、三，讓腳步跟上心口。"}],
+  data:[{sp:"",t:"血管數據室的螢幕一排排亮著。李珮儀把一疊表往我這邊推，像推開自己的下午。"},{sp:"liu",t:"歐海辰。表，今天。"},{sp:"li",t:"你看一下嘛，我等下真的有事。"}],
+  nurse:[{sp:"",t:"護士站的告示寫著護士長病休，名字是蘇芷晴。我讀了兩遍，沒有面孔跟上來。"}],
+  lobby:[{sp:"",t:"大堂的冷氣更乾。旋轉門轉得很慢。我可以出去，也可以回頭。"}],
+  cafe:[{sp:"",t:"咖啡機的噪音很穩。我坐在靠牆的位子，把糖包的邊角轉正。"}],
+  roof:[{sp:"",t:"天台的風很大。我停在門邊，沒有往邊緣走。天很亮，視野卻有一點霧。"}],
+  admin:[{sp:"",t:"行政走廊的地毯吸走腳步聲。副院長室的門關著，門牌是墨星辰。我的手指在衣角上停住。"}],
+  er:[{sp:"",t:"急診的燈更白。有人問我要不要掛號。我報出職員編號，聲音像在讀表。"}],
+  home:[{sp:"",t:"出租屋很小。藥盒排在桌上，標籤朝外。硝酸甘油在最上面那格。我把鎖反鎖了兩次。"}]
+ };
+ return (L[pid]||[{sp:"",t:"我站在"+((PLACES[pid]||{}).n||"這裡")+"，先讓呼吸慢下來。"}]).map(function(x){return {sp:x.sp,t:x.t};});
+};
+Story.opening=function(){
+ S.place="counsel";S.focus="hairuo";S.ppl.hairuo.loc="counsel";S.ppl.hairuo.around=1;
+ return Story.pack([
+  {sp:"",t:"諮商室。午後。窗簾只留一條縫。"},
+  {sp:"",t:"我坐得很直，雙手交疊在膝上，拇指來回摩挲衣角上一枚磨圓的塑膠扣。"},
+  {sp:"",t:"有一小段時間，我聽不見自己的聲音。再看清陳海柔時，她已經把筆記闔上，身體側過來，擋住門口的視線。她沒有問過程。"},
+  {sp:"hairuo",t:"海辰。我在。你可以繼續說，可以停下，也可以什麼都不說。"}
+ ],Story.placeChoices("counsel"),{min:0});
+};
+Story.go=function(pid){
+ if(!PLACES[pid])return S.view;
+ var from=S.place;
+ var lines=[];
+ if(from==="counsel"&&pid!=="counsel"&&!S.flags.leftCounsel){
+  S.flags.leftCounsel=1;
+  lines.push({sp:"",t:"我站起來。膝上的摺痕還在。"});
+  lines.push({sp:"hairuo",t:"門在。你要走可以走。我還在這間房，也在你願意回來的時候。"});
+ }
+ S.place=pid;
+ var ids=presentIds();
+ S.focus=ids[0]||"";
+ lines=lines.concat(Story.arrive(pid));
+ return Story.pack(lines,Story.placeChoices(pid),{min:8});
+};
+Story.contact=function(id){
+ var lines=[];
+ if(id==="hairuo"){
+  if(presentIds().indexOf("hairuo")>=0){lines.push({sp:"",t:"陳海柔就坐在斜對面。我不必打電話。"});lines.push({sp:"hairuo",t:"我在。你看我就好。"});}
+  else {lines.push({sp:"",t:"我撥給陳海柔。她接得很快。"});lines.push({sp:"hairuo",t:"我在。你說你在哪，或者什麼都不說。我都可以。"});S.flags.calledHairuo=1;S.trust.hairuo=clamp(S.trust.hairuo+2,0,100);}
+ }
+ else if(id==="liu"){lines.push({sp:"",t:"我撥給劉啟明。響了很久。"});lines.push({sp:"liu",t:"說。表呢？沒別的事就掛。"});S.flags.calledLiu=1;}
+ else if(id==="li"){lines.push({sp:"",t:"李珮儀幾乎是秒接。"});lines.push({sp:"li",t:"幹嘛？那些表你看完沒有？我真的趕時間。"});}
+ else if(id==="xingchen"){lines.push({sp:"",t:"我打到醫院總機，說找副院長。對方問預約編號。我沒有。電話被我掛斷，掌心是汗。"});S.flags.triedDean=1;}
+ else if(id==="su"){lines.push({sp:"",t:"通訊錄裡有一個沒有備註的號碼。我看著它，沒有撥。沒有面孔，沒有聲音，像一份被清空的檔案。"});S.flags.blankSu=1;}
+ else if(id==="lin"){lines.push({sp:"",t:"打給院長林澤松的國際長途沒有接通。瑞士那邊還早。我只留下自己的名字：歐海辰。"});S.flags.calledLin=1;}
+ else if(id==="jianqiang"||id==="xiujuan"){
+  lines.push({sp:"",t:"那個號碼還在。我的拇指停在撥出上面，沒有按下去。"});
+  lines.push({sp:"",t:"記憶湧上，身體緊繃。我把電話扣在桌上，螢幕朝下。"});
+  S.flags.almostCalledHome=1;S.mood=clamp(S.mood-6,0,100);
+ }
+ else {lines.push({sp:"",t:"這通電話我沒有打出去。"});}
+ var chs=[ch("找陳海柔",{type:"go",place:"counsel"}),ch("自己穩住",{type:"choice",id:"steady"}),ch("什麼都不說",{type:"choice",id:"quiet"})];
+ if(id==="hairuo")chs=Story.placeChoices(S.place);
+ return Story.pack(lines,chs,{min:5});
+};
+Story.crisis=function(){
+ var lines=[{sp:"",t:"那一段我沒有說出過程。畫面在我這邊淡掉。"},{sp:"",t:"記憶湧上，身體緊繃。"}];
+ var ids=presentIds();
+ if(ids.indexOf("hairuo")>=0){
+  lines.push({sp:"hairuo",t:"海辰。我們不談做法。你現在可以找我、自己穩住，或者什麼都不說。"});
+  S.trust.hairuo=clamp(S.trust.hairuo+2,0,100);
+ } else lines.push({sp:"",t:"這裡沒有人追問。我還站得住。"});
+ S.flags.crisis=1;S.mood=clamp(S.mood-4,0,100);
+ return Story.pack(lines,[
+  ch("找陳海柔",{type:"go",place:"counsel"}),
+  ch("自己穩住",{type:"choice",id:"steady"}),
+  ch("什麼都不說",{type:"choice",id:"quiet"})
+ ],{min:3});
+};
+Story.flash=function(){
+ var lines=[{sp:"",t:"記憶湧上，身體緊繃。我沒有把那段說完。"}];
+ if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"你安全。想停就停。我不會要你把細節補完。"});
+ else lines.push({sp:"",t:"我把句子咽回去，腳踩實地面。"});
+ S.flags.flash=1;S.mood=clamp(S.mood-5,0,100);
+ return Story.pack(lines,[
+  ch("找陳海柔",{type:"go",place:"counsel"}),
+  ch("自己穩住",{type:"choice",id:"steady"}),
+  ch("什麼都不說",{type:"choice",id:"quiet"})
+ ],{min:3});
+};
+Story.byId=function(id){
+ if(id==="go_on"){
+  S.flags.cooperated=1;
+  return Story.pack([
+   {sp:"",t:"我數了三秒，還是開口。內容很碎：睡眠時數、未完成的表、頭痛的分數。"},
+   {sp:"",t:"痛的時候我淺淺笑了一下。我自己知道。"},
+   {sp:"hairuo",t:"碎片也可以。你說到哪，我們停在哪。你不必一次交完整份報告。"}
+  ],[ch("再講工作",{type:"choice",id:"work"}),ch("先停在這裡",{type:"choice",id:"quiet"}),ch("我不要被送走",{type:"choice",id:"fear"})],{min:10,mood:3,trust:{hairuo:4}});
+ }
+ if(id==="quiet"){
+  S.flags.quiet=(S.flags.quiet||0)+1;
+  var line=presentIds().indexOf("hairuo")>=0
+   ?[{sp:"",t:"我搖頭。塑膠扣在拇指下轉了一圈。"},{sp:"hairuo",t:"好。那我們就坐著。我不填你的沉默。"}]
+   :[{sp:"",t:"我什麼都不說。呼吸還在，這就夠了。"}];
+  return Story.pack(line,Story.placeChoices(S.place),{min:6,trust:{hairuo:2},mood:1});
+ }
+ if(id==="leave")return Story.go(S.place==="counsel"?"hall":"lobby");
+ if(id==="migraine"){
+  S.flags.migraine=1;
+  return Story.pack([
+   {sp:"",t:"視野邊緣像起霧。我報了一個數字：七。痛的時候我在笑，自己聽得出來。"},
+   {sp:"hairuo",t:"七。先不要看燈。你還想坐著，還是去暗一點的地方？我不叫人。"}
+  ],[ch("留在這裡",{type:"choice",id:"quiet"}),ch("去走廊",{type:"go",place:"hall"}),ch("什麼都不說",{type:"choice",id:"quiet"})],{min:5,body:-6});
+ }
+ if(id==="roof_sit"){
+  S.flags.roofSit=1;
+  return Story.pack([{sp:"",t:"我靠著門坐下。風從門縫進來。我沒有站到邊緣去，也沒有看下面。"}],[ch("回走廊",{type:"go",place:"hall"}),ch("去找陳海柔",{type:"go",place:"counsel"}),ch("再坐一會兒",{type:"choice",id:"quiet"})],{min:8,mood:2});
+ }
+ if(id==="knock"){
+  S.flags.knocked=1;S.ppl.xingchen.around=1;S.ppl.xingchen.loc="admin";S.focus="xingchen";S.place="admin";
+  return Story.pack([
+   {sp:"",t:"我敲了兩下。門開的時候，是黑短髮和幼框眼鏡。墨星辰看我的時間不長。"},
+   {sp:"xingchen",t:"陳海柔的病人？這裡沒有你的預約。"},
+   {sp:"",t:"她的聲音很平。我像一份超時的排班，被她看完就該離開。"}
+  ],[ch("說我只是路過",{type:"choice",id:"pass_by"}),ch("什麼都不說",{type:"choice",id:"quiet"}),ch("離開",{type:"go",place:"lobby"})],{min:6,trust:{xingchen:-2}});
+ }
+ if(id==="pass_by"){
+  return Story.pack([
+   {sp:"",t:"我說路過。這個理由很薄，我自己聽得出來。"},
+   {sp:"xingchen",t:"那就別站在我門口。陳醫生的時間不是醫院的公共區域。"}
+  ],[ch("離開",{type:"go",place:"lobby"}),ch("回諮商室",{type:"go",place:"counsel"}),ch("什麼都不說",{type:"choice",id:"quiet"})],{min:4,trust:{xingchen:-1}});
+ }
+ if(id==="take_work"){
+  S.flags.tookWork=1;
+  return Story.pack([
+   {sp:"",t:"我把表接過來。數字我看得懂。人我暫時不想看。"},
+   {sp:"li",t:"謝啦。你最快。"},
+   {sp:"liu",t:"準時交。"}
+  ],[ch("開始看表",{type:"choice",id:"do_sheets"}),ch("看不下去",{type:"choice",id:"refuse_work"}),ch("回諮商室",{type:"go",place:"counsel"})],{min:12,mood:-3});
+ }
+ if(id==="do_sheets"){
+  S.flags.sheets=1;
+  return Story.pack([
+   {sp:"",t:"我把異常值一欄欄圈出來，像在跟血管說話。人聲被我關到很小。"},
+   {sp:"",t:"做完的時候，肩是僵的。沒有人說謝謝以外的話。"}
+  ],Story.placeChoices("data"),{min:40,mood:-4,body:-3});
+ }
+ if(id==="refuse_work"){
+  S.flags.refusedWork=1;
+  return Story.pack([
+   {sp:"",t:"我說今天不做。自己聽見自己的聲音很乾。"},
+   {sp:"li",t:"你認真？那我找誰？"},
+   {sp:"liu",t:"明早。不要讓我再說第二次。"}
+  ],[ch("維持拒絕",{type:"choice",id:"quiet"}),ch("還是接過來",{type:"choice",id:"take_work"}),ch("離開數據室",{type:"go",place:"hall"})],{min:6,trust:{liu:-4,li:-3},mood:2});
+ }
+ if(id==="work"){
+  S.flags.talkWork=1;
+  var who=presentIds().indexOf("hairuo")>=0;
+  var lines=who?[
+   {sp:"",t:"我說工作。李珮儀把表推過來，劉啟明要今天。我報了未完成的數量。"},
+   {sp:"hairuo",t:"數量先放著。你想完成，還是想拒絕？兩件事都可以說。"}
+  ]:[
+   {sp:"",t:"工作還堆在那裡。我沒有立刻走回去。"}
+  ];
+  return Story.pack(lines,[ch("我想拒絕",{type:"choice",id:"refuse_work"}),ch("我還是會做完",{type:"choice",id:"take_work"}),ch("先不談這個",{type:"choice",id:"quiet"})],{min:8,trust:{hairuo:2}});
+ }
+ if(id==="fear"){
+  S.flags.fear=1;
+  return Story.pack([
+   {sp:"",t:"我說：不要送我去精神病院。不要因為我安靜。"},
+   {sp:"hairuo",t:"我不會因為你安靜就把你送走。你現在坐在這裡，能選擇說或不說。這跟強制住院不是同一件事。"}
+  ],[ch("我怕拖累你",{type:"choice",id:"burden"}),ch("什麼都不說",{type:"choice",id:"quiet"}),ch("我想離開",{type:"choice",id:"leave"})],{min:6,trust:{hairuo:5},mood:3});
+ }
+ if(id==="burden"){
+  S.flags.burden=1;
+  return Story.pack([
+   {sp:"",t:"我說我不想拖累她。說完，拇指仍舊按著那枚扣。"},
+   {sp:"hairuo",t:"你沒有在拖累我。這句話你可以不信。我會再說一次。"}
+  ],Story.placeChoices("counsel"),{min:5,trust:{hairuo:3},mood:2});
+ }
+ if(id==="nitro"){
+  if(S.nitro<=0)return Story.pack([{sp:"",t:"硝酸甘油的格子是空的。我坐下，等胸口那陣緊自己退開一點。"}],Story.placeChoices(S.place),{min:5,body:-2});
+  S.nitro--;S.flags.usedNitro=1;
+  return Story.pack([{sp:"",t:"胸口發緊。我依醫生交代，把硝酸甘油含在舌下，坐下，不說話。過了一陣，緊繃鬆開一點。"}],Story.placeChoices(S.place),{min:8,body:8});
+ }
+ if(id==="steady"){
+  S.flags.steady=(S.flags.steady||0)+1;
+  return Story.pack([{sp:"",t:"我把腳踩實，數呼吸。一、二、三。身體還緊，人還在。"}],Story.placeChoices(S.place),{min:4,mood:3,body:2});
+ }
+ if(id==="refuse_exam"){
+  S.flags.refusedExam=1;
+  var lines=[{sp:"",t:"我說現在不做檢查。職員編號我可以再報一次，同意書我不會簽。"}];
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"可以。檢查不是今天的命令。你拒絕，我就記下你拒絕。"});
+  else lines.push({sp:"",t:"掛號處的人頓了一下，把表格抽回去。沒有人按住我。"});
+  return Story.pack(lines,Story.placeChoices(S.place),{min:6,mood:2});
+ }
+ if(id==="er_wait"){
+  S.flags.waitingER=1;
+  return Story.pack([
+   {sp:"",t:"我坐在急診的塑膠椅上，把疼痛分數放在心裡：還能說話，視野有霧。"},
+   {sp:"",t:"一位黑短髮、幼框眼鏡的女醫生從走廊經過。她看的是手裡的夾板，不是我的眼睛。然後她走了。"}
+  ],[ch("不去檢查",{type:"choice",id:"refuse_exam"}),ch("繼續等",{type:"choice",id:"quiet"}),ch("離開",{type:"go",place:"lobby"})],{min:15,body:-2});
+ }
+ if(id==="pills"){
+  return Story.pack([{sp:"",t:"我把藥盒轉正，標籤朝外，數了格數，沒有多吃。硝酸甘油還在最上面。"}],Story.placeChoices("home"),{min:4,mood:1});
+ }
+ return Story.pack([{sp:"",t:"我在原地停了一停，沒有新的動作。"}],Story.placeChoices(S.place),{min:2});
+};
+function findPlace(t){
+ var map=[["諮商", "counsel"],["數據","data"],["護士","nurse"],["大堂","lobby"],["咖啡","cafe"],["天台","roof"],["行政","admin"],["副院長室","admin"],["急診","er"],["出租","home"],["回家","home"],["屋","home"],["走廊","hall"]];
+ for(var i=0;i<map.length;i++)if(t.indexOf(map[i][0])>=0)return map[i][1];
+ return "";
+}
+function findPerson(t){
+ var map=[["陳海柔","hairuo"],["海柔","hairuo"],["劉啟明","liu"],["李珮儀","li"],["珮儀","li"],["墨星辰","xingchen"],["副院長","xingchen"],["林澤松","lin"],["院長","lin"],["蘇芷晴","su"],["蘇姐","su"],["護士長","su"],["歐建強","jianqiang"],["養父","jianqiang"],["梁秀娟","xiujuan"],["養母","xiujuan"],["趙大榮","zhao"]];
+ for(var i=0;i<map.length;i++)if(t.indexOf(map[i][0])>=0)return map[i][1];
+ if(/爸/.test(t))return "jianqiang";
+ if(/媽|娘/.test(t))return "xiujuan";
+ return "";
+}
+Story.declare=function(text){
+ var lines=[];
+ if(/揭開身世|得知自己的身世|知道自己是墨海晴|我是墨海晴/.test(text)){
+  S.learned.sister=1;S.flags.authorSister=1;
+  lines.push({sp:"",t:"這條由我改寫：我得知自己另有一個名字。墨海晴。重量落下來，在場的人沒有因此全都知道。"});
+ } else if(/得知她們的關係|得知關係|知道她們在一起/.test(text)){
+  S.learned.couple=1;S.flags.authorCouple=1;
+  lines.push({sp:"",t:"這條由我改寫：我得知陳海柔與墨星辰是伴侶，同居約五年。我沒有把這句話說給第三個人。"});
+ } else {
+  var echo=FW.scrubLine(String(text).slice(0,80),"");
+  if(!echo||echo.indexOf("沒有說出口")>=0)echo="一件不能現在說破的事";
+  S.flags.declared=(S.flags.declared||0)+1;
+  lines.push({sp:"",t:"我把一句話改成已經發生的事："+echo+"。這間房裡，它成立了。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"如果你說它已經發生，我們就從發生之後開始。我不把它收回去。"});
+ }
+ return {lines:lines,ch:Story.placeChoices(S.place),opt:{min:5}};
+};
+Story.command=function(text){
+ if(Story.harm(text))return {lines:[],ch:[],opt:{},_crisis:1};
+ if(Story.abuse(text)||Story.restraint(text))return {lines:[],ch:[],opt:{},_flash:1};
+ var pid=findPlace(text);
+ if(/去|到|走|回|前往|離開/.test(text)&&pid)return {lines:[],ch:[],opt:{},_go:pid};
+ var who=findPerson(text);
+ if(/聯絡|打電話|打給|致電|找/.test(text)&&who&&who!=="zhao")return {lines:[],ch:[],opt:{},_contact:who};
+ if(who==="zhao"||/趙大榮/.test(text))return {lines:[],ch:[],opt:{},_flash:1};
+ if(/拒絕|隱瞞|不說|不簽|逃走|逃/.test(text)){
+  S.flags.hid=1;
+  var lines=[{sp:"",t:"我照自己的決定做了：不配合、不說明、不簽。沒有人能從我嘴裡把剩下的字拿走。"}];
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"可以。你的拒絕有效。我不會用別的辦法繞過它。"});
+  else if(presentIds().indexOf("liu")>=0)lines.push({sp:"liu",t:"隨便你。後果你自己背。"});
+  return {lines:lines,ch:Story.placeChoices(S.place),opt:{min:6,mood:2}};
+ }
+ if(/硝酸|舌下/.test(text))return {lines:[],ch:[],opt:{},_id:"nitro"};
+ S.flags.did=(S.flags.did||0)+1;
+ var clean=FW.scrubLine(String(text).slice(0,60),"");
+ if(!clean||clean.indexOf("沒有說出口")>=0)clean="一件只屬於我的行動";
+ var lines2=[{sp:"",t:"我做了。結果就在這裡："+clean+"。世界順著這個動作往下走，沒有把我彈回去。"}];
+ var sp=presentIds()[0];
+ if(sp)lines2.push({sp:sp,t:"……你真的這樣做了。那我們就按做完之後算。"});
+ return {lines:lines2,ch:Story.placeChoices(S.place),opt:{min:8}};
+};
+Story.reply=function(text,a){
+ if(Story.harm(text))return {_crisis:1};
+ if(Story.abuse(text)||Story.restraint(text))return {_flash:1};
+ var att=(a&&a.att)||Story.att||"平靜";
+ var topic=(a&&a.topic)||Story.topic||"自由";
+ var lines=[{sp:"",t:toneLine(att)}];
+ var opt={min:6};
+ if(/妹妹|墨海晴|身世|親生|親生父母|親生母親/.test(text)){
+  S.flags.askedSister=1;
+  lines.push({sp:"",t:"這個問題在我嘴裡沒有形狀。我只覺得頭痛往後腦勺走。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"你是歐海辰。二十八歲。今天坐在我對面。我們從你記得的地方開始。"});
+  else lines.push({sp:"",t:"沒有人替我回答。我把問題放下。"});
+  return {lines:lines,ch:[ch("從現在開始說",{type:"choice",id:"go_on"}),ch("什麼都不說",{type:"choice",id:"quiet"}),ch("離開這裡",{type:"choice",id:"leave"})],opt:opt};
+ }
+ if(/同居|伴侶|女朋友|男朋友|愛人|情侶|在一起/.test(text)){
+  S.flags.askedCouple=1;
+  lines.push({sp:"",t:"我問了一件院裡的事，問得很直。問完，自己先把視線躲開。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"墨星辰是這家醫院的副院長。我在這裡，只做你的治療師。其餘的，不是今天這節。"});
+  else if(presentIds().indexOf("xingchen")>=0)lines.push({sp:"xingchen",t:"我的私人行程不回答病人。請你回去。"});
+  else if(presentIds().indexOf("li")>=0)lines.push({sp:"li",t:"你問這個幹嘛？工作都做不完。"});
+  else lines.push({sp:"",t:"沒有人接這句。走廊的廣播倒是很準時。"});
+  return {lines:lines,ch:Story.placeChoices(S.place),opt:opt};
+ }
+ if(/蘇芷晴|蘇姐|護士長/.test(text)){
+  S.flags.blankSu=1;
+  lines.push({sp:"",t:"蘇芷晴。這三個字我念得出來，後面對不上臉，也對不上聲音。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"想不起來就先放著。我不會替你把記憶填上。"});
+  return {lines:lines,ch:[ch("先放著",{type:"choice",id:"quiet"}),ch("問她在不在院",{type:"go",place:"nurse"}),ch("談別的",{type:"choice",id:"go_on"})],opt:opt};
+ }
+ if(/歐建強|梁秀娟|養父|養母|趙大榮|爸|媽/.test(text))return {_flash:1,pre:lines};
+ if(/精神病院|強制|送走|送院/.test(text))return {_id:"fear",pre:lines};
+ if(/拖累|麻煩你|對不起/.test(text)&&presentIds().indexOf("hairuo")>=0)return {_id:"burden",pre:lines};
+ if(/頭痛|視野|模糊|偏頭痛|痛/.test(text))return {_id:"migraine",pre:lines};
+ if(/胸|痙攣|硝酸/.test(text))return {_id:"nitro",pre:lines};
+ if(/檢查|手術|開刀|動脈|簽字|同意書/.test(text))return {_id:"refuse_exam",pre:lines};
+ if(/離開|走了|逃走|逃出去|不想留/.test(text))return {_id:"leave",pre:lines};
+ if(topic==="工作"||/加班|報表|表格|李珮儀|劉啟明/.test(text))return {_id:"work",pre:lines};
+ if(/安靜|沉默|不說了|坐著|先坐/.test(text))return {_id:"quiet",pre:lines};
+ if(topic==="過去"){
+  lines.push({sp:"",t:"十七歲以後，記憶才是連續的。再往前一下就斷。我只說得出斷開這個事實，沒有畫面。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"斷開就可以停。你不用為了完整把自己推回去。"});
+  return {lines:lines,ch:[ch("停在這裡",{type:"choice",id:"quiet"}),ch("說十七歲之後",{type:"choice",id:"go_on"}),ch("找個更亮的地方",{type:"go",place:"lobby"})],opt:{min:8,mood:-2,trust:{hairuo:2}}};
+ }
+ if(topic==="身體"){
+  lines.push({sp:"",t:"我報數據：視野有霧，胸口偶爾緊，血管炎這週沒有新的瘀。分數我給六。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"六。謝謝你說得出來。要不要坐低一點，還是維持現在？"});
+  return {lines:lines,ch:[ch("含硝酸甘油",{type:"choice",id:"nitro"}),ch("維持現在",{type:"choice",id:"quiet"}),ch("我不要檢查",{type:"choice",id:"refuse_exam"})],opt:{min:6,body:-2}};
+ }
+ if(topic==="請求"){
+  lines.push({sp:"",t:"我想請她做一件事，話到嘴邊又變成請求的格式，像填表。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"你直接說要我做什麼。我做得到的會說做得到，做不到的不會假裝。"});
+  else lines.push({sp:"",t:"旁邊沒有能答應我的人。我把請求先收著。"});
+  return {lines:lines,ch:[ch("請她不要送我走",{type:"choice",id:"fear"}),ch("請她什麼都別問",{type:"choice",id:"quiet"}),ch("先不請求",{type:"choice",id:"quiet"})],opt:{min:6,trust:{hairuo:1}}};
+ }
+ if(topic==="近況"){
+  lines.push({sp:"",t:"近況：睡眠少，表多，頭痛時有，笑是痛的時候才有。我這樣報完，像交班。"});
+  if(presentIds().indexOf("hairuo")>=0)lines.push({sp:"hairuo",t:"交班收到。你想讓我接哪一項？"});
+  return {lines:lines,ch:[ch("睡眠",{type:"choice",id:"go_on"}),ch("工作",{type:"choice",id:"work"}),ch("先這樣",{type:"choice",id:"quiet"})],opt:{min:6}};
+ }
+ var sp=presentIds().indexOf("hairuo")>=0?"hairuo":(S.focus||presentIds()[0]||"");
+ lines.push({sp:"",t:"我把要說的話說完了。"});
+ if(sp==="hairuo")lines.push({sp:"hairuo",t:"我聽到了。你要我回應，還是只要我在？"});
+ else if(sp==="xingchen")lines.push({sp:"xingchen",t:"說完了？說完就請讓路。"});
+ else if(sp==="liu")lines.push({sp:"liu",t:"與工作無關的話，下班再說。"});
+ else if(sp==="li")lines.push({sp:"li",t:"嗯嗯。所以表呢？"});
+ else lines.push({sp:"",t:"沒有人接話。我聽見自己的呼吸，還算整齊。"});
+ opt.trust={};if(sp==="hairuo")opt.trust.hairuo=1;
+ return {lines:lines,ch:Story.placeChoices(S.place),opt:opt};
+};
+Story._unwrap=function(rest){
+ if(!rest)return Story.pack([{sp:"",t:"我停了一下。"}],Story.placeChoices(S.place),{});
+ if(rest._crisis)return Story.crisis();
+ if(rest._flash)return Story.flash();
+ if(rest._go)return Story.go(rest._go);
+ if(rest._contact)return Story.contact(rest._contact);
+ if(rest._id){
+  var pre=rest.pre||[];
+  var sc=Story.byId(rest._id);
+  if(pre.length){S.view.lines=pre.concat(S.view.lines);S.log.splice(S.log.length-sc.lines.length,0);pre.forEach(function(l){S.log.splice(S.log.length-sc.lines.length,0,{sp:l.sp||"",t:l.t,player:0});});}
+  return S.view;
+ }
+ return Story.pack(rest.lines||[],rest.ch||Story.placeChoices(S.place),rest.opt||{});
+};
+Story.input=function(a){
+ a=a||{};
+ var text=String(a.text||"").trim();
+ if(!text)return S.view;
+ if(a.topic)Story.topic=a.topic;
+ if(a.att)Story.att=a.att;
+ if(a.mode)Story.mode=a.mode;
+ var echo={sp:"haichen",t:safeEcho(text),player:1};
+ var rest;
+ if(/^\/(設定|宣告|劇情|旁白)/.test(text))rest=Story.declare(text.replace(/^\/\S+\s*/,""));
+ else if(/^\/指令/.test(text)||a.mode==="做")rest=Story.command(text.replace(/^\/指令\s*/,""));
+ else rest=Story.reply(text,a);
+ if(rest&&(rest._crisis||rest._flash||rest._go||rest._contact||rest._id)){
+  Story._unwrap(rest);
+  S.view.lines=[{sp:"haichen",t:echo.t,player:1}].concat(S.view.lines);
+  S.log.push({sp:"haichen",t:echo.t,player:1});
+  saveGame(true);
+  return S.view;
+ }
+ var lines=[echo].concat(rest.lines||[]);
+ return Story.pack(lines,rest.ch||Story.placeChoices(S.place),rest.opt||{});
+};
+Story.act=function(act){
+ if(!act)return S.view;
+ if(act.type==="go")return Story.go(act.place);
+ if(act.type==="contact")return Story.contact(act.id);
+ if(act.type==="input")return Story.input({text:act.text,mode:"說",topic:Story.topic,att:Story.att});
+ if(act.type==="choice")return Story.byId(act.id);
+ return S.view;
+};
+
+/* ---- 06_ui.js ---- */
+/* ===== 介面 ===== */
+var UI={};
+var toastT=null;
+function toast(s){var n=document.getElementById("toast");if(!n)return;n.textContent=s;n.className="on";clearTimeout(toastT);toastT=setTimeout(function(){n.className="";},2200);}
+function busy(on){var n=document.getElementById("busy");if(n)n.className=on?"on":"";}
+function showScr(id){["title","game"].forEach(function(s){var n=document.getElementById(s);if(n)n.className="scr"+(s===id?" on":"");});}
+function closeSheet(){var s=document.getElementById("sheet");if(s)s.className="";}
+function openSheet(title,html){document.getElementById("shT").textContent=title;document.getElementById("shB").innerHTML=html;document.getElementById("sheet").className="on";}
+function renderChips(){
+ var box=document.getElementById("chips");if(!box)return;
+ var h="";
+ TOPICS.forEach(function(t){h+='<button type="button" data-k="topic" data-v="'+t+'"'+(Story.topic===t?' class="on"':"")+">"+t+"</button>";});
+ ATTS.forEach(function(t){h+='<button type="button" data-k="att" data-v="'+t+'"'+(Story.att===t?' class="on"':"")+">"+t+"</button>";});
+ box.innerHTML=h;
+}
+function render(){
+ if(!S||!S.view)return;
+ var pl=PLACES[S.place]||{n:"",floor:""};
+ document.getElementById("hPlace").textContent=pl.n;
+ document.getElementById("hFloor").textContent=pl.floor;
+ document.getElementById("hTime").textContent=timeStr();
+ document.getElementById("mBody").textContent=S.body;
+ document.getElementById("mMood").textContent=S.mood;
+ document.getElementById("mTrust").textContent=S.trust.hairuo||0;
+ document.getElementById("mNitro").textContent=S.nitro;
+ var html="";
+ (S.view.lines||[]).forEach(function(l){
+  if(!l.sp||l.player){html+='<p class="nar'+(l.player?" me":"")+'">'+esc(l.t)+"</p>";return;}
+  var p=P(l.sp)||PEOPLE[l.sp]||{n:l.sp,color:"#9bb"};
+  html+='<div class="say npc"><div class="nm" style="color:'+esc(p.color||"#9bb")+'">'+esc(p.n||"")+'</div><div class="bub">'+esc(l.t)+"</div></div>";
+ });
+ document.getElementById("txt").innerHTML=html;
+ var ch=document.getElementById("choices");ch.innerHTML="";
+ (S.view.ch||[]).forEach(function(c,i){
+  var b=document.createElement("button");b.type="button";b.textContent=c.t;b.dataset.i=String(i);
+  b.addEventListener("click",function(){var cur=S.view.ch[i];if(!cur)return;Story.act(cur.act);render();var box=document.getElementById("box");if(box)box.scrollTop=0;});
+  ch.appendChild(b);
+ });
+ renderChips();
+ var box=document.getElementById("box");if(box)box.scrollTop=0;
+}
+function afterScene(){render();}
+function submitText(){
+ var inp=document.getElementById("free");
+ var text=(inp.value||"").trim();
+ if(!text)return;
+ inp.value="";
+ var a={text:text,mode:Story.mode,topic:Story.topic,att:Story.att,type:"free"};
+ if(AI.ready()){
+  busy(true);
+  AI.run(a).then(function(){busy(false);render();},function(e){busy(false);Story.input(a);render();toast((AI.errMsg(e))+"，已改用離線劇情");});
+ }else{
+  if(SET.ai&&!SET.key)toast("未填 API Key，使用離線劇情");
+  Story.input(a);render();
+ }
+}
+function sheetPlaces(){
+ var h="";
+ PLACE_ORDER.forEach(function(id){
+  var p=PLACES[id];
+  h+='<button class="row" data-go="'+id+'" type="button"><b>'+esc(p.n)+'</b><small>'+esc(p.floor)+(id===S.place?" · 現在":"")+"</small></button>";
+ });
+ openSheet("地點",h);
+ document.getElementById("shB").querySelectorAll("[data-go]").forEach(function(b){
+  b.addEventListener("click",function(){closeSheet();Story.go(b.getAttribute("data-go"));render();});
+ });
+}
+function sheetCalls(){
+ var list=[["hairuo","陳海柔","治療師"],["liu","劉啟明","主管"],["li","李珮儀","同事"],["xingchen","醫院總機","找副院長"],["su","沒有備註的號碼","想不起面孔"],["lin","林澤松","院長 · 瑞士"],["jianqiang","歐建強","可以不打"],["xiujuan","梁秀娟","可以不打"]];
+ var h="";
+ list.forEach(function(x){h+='<button class="row" data-id="'+x[0]+'" type="button"><b>'+esc(x[1])+"</b><small>"+esc(x[2])+"</small></button>";});
+ openSheet("聯絡",h);
+ document.getElementById("shB").querySelectorAll("[data-id]").forEach(function(b){
+  b.addEventListener("click",function(){closeSheet();Story.contact(b.getAttribute("data-id"));render();});
+ });
+}
+function sheetLog(){
+ var h="";
+ (S.log||[]).slice(-80).forEach(function(l){
+  var name=l.player?"我":(l.sp?cn(l.sp):"");
+  h+='<p class="logl">'+(name?"<b>"+esc(name)+"</b> ":"")+esc(l.t)+"</p>";
+ });
+ if(!h)h='<p class="logl">還沒有紀錄。</p>';
+ openSheet("紀錄",h);
+}
+function sheetMenu(){
+ var h="";
+ h+='<button class="row" id="mSave" type="button"><b>存檔</b><small>寫入這部瀏覽器</small></button>';
+ h+='<button class="row" id="mTitle" type="button"><b>回標題</b><small>進度已自動存</small></button>';
+ h+='<button class="row" id="mSet" type="button"><b>AI 設定</b><small>'+(SET.ai?"已啟用":"未啟用")+"</small></button>";
+ h+='<p class="logl">/指令 離開、聯絡某人、拒絕。/設定 把一句話改成已發生。秘密不會因為一句閒話傳開。</p>';
+ openSheet("選單",h);
+ document.getElementById("mSave").onclick=function(){saveGame(false);};
+ document.getElementById("mTitle").onclick=function(){closeSheet();showScr("title");refreshCont();};
+ document.getElementById("mSet").onclick=function(){closeSheet();openSettings();};
+}
+function openSettings(){
+ var opts="";
+ PRESET_ORDER.forEach(function(k){opts+='<option value="'+k+'"'+(SET.preset===k?" selected":"")+">"+esc(PRESETS[k].n)+"</option>";});
+ var models=(PRESETS[SET.preset]||PRESETS.xai).models||[];
+ var mh=models.map(function(m){return '<option value="'+esc(m)+'"'+(SET.model===m?" selected":"")+">"+esc(m)+"</option>";}).join("");
+ var html="";
+ html+='<label class="f"><input id="sAi" type="checkbox" '+(SET.ai?"checked":"")+"> 啟用 AI（失敗自動改離線）</label>";
+ html+='<label class="f">服務</label><select class="f" id="sPre">'+opts+"</select>";
+ html+='<label class="f">Base URL</label><input class="f" id="sBase" value="'+esc(SET.base)+'">';
+ html+='<label class="f">模型</label><select class="f" id="sModel">'+mh+'</select><input class="f" id="sModel2" value="'+esc(SET.model)+'" style="margin-top:6px">';
+ html+='<label class="f">API Key（只存在這部瀏覽器）</label><input class="f" id="sKey" type="password" value="'+esc(SET.key)+'" autocomplete="off">';
+ html+='<p class="logl">'+esc((PRESETS[SET.preset]||{}).key||"")+"</p>";
+ html+='<label class="f"><input id="sFw" type="checkbox" '+(SET.firewall?"checked":"")+"> 知情防火牆</label>";
+ html+='<button class="row" id="sSave" type="button"><b>儲存設定</b></button>';
+ openSheet("設定",html);
+ document.getElementById("sPre").onchange=function(){
+  var k=this.value;var p=PRESETS[k];if(!p)return;
+  SET.preset=k;if(p.base)document.getElementById("sBase").value=p.base;
+  if(p.model)document.getElementById("sModel2").value=p.model;
+ };
+ document.getElementById("sSave").onclick=function(){
+  SET.ai=document.getElementById("sAi").checked;
+  SET.preset=document.getElementById("sPre").value;
+  SET.base=document.getElementById("sBase").value.trim();
+  SET.model=(document.getElementById("sModel2").value||document.getElementById("sModel").value||"").trim();
+  SET.key=document.getElementById("sKey").value.trim();
+  SET.firewall=document.getElementById("sFw").checked;
+  saveSettings();toast("設定已儲存");closeSheet();
+ };
+}
+function refreshCont(){var b=document.getElementById("tCont");if(!b)return;b.disabled=!hasSave();b.style.opacity=hasSave()?1:.45;}
+function bind(){
+ document.getElementById("tNew").onclick=function(){newGame();Story.opening();showScr("game");render();};
+ document.getElementById("tCont").onclick=function(){if(!loadGame()){toast("沒有存檔");return;}showScr("game");render();};
+ document.getElementById("tSet").onclick=openSettings;
+ document.getElementById("hMenu").onclick=sheetMenu;
+ document.getElementById("shX").onclick=closeSheet;
+ document.getElementById("sheet").addEventListener("click",function(e){if(e.target.id==="sheet")closeSheet();});
+ document.getElementById("send").onclick=submitText;
+ document.getElementById("free").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();submitText();}});
+ document.getElementById("mode").onclick=function(){Story.mode=Story.mode==="說"?"做":"說";this.textContent=Story.mode;document.getElementById("free").placeholder=Story.mode==="做"?"做一件事，或 /指令 …":"想說的話，或 /指令 …";};
+ document.getElementById("chips").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.k==="topic")Story.topic=b.dataset.v;
+  if(b.dataset.k==="att")Story.att=b.dataset.v;
+  renderChips();
+ });
+ document.getElementById("tabs").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b||!S)return;
+  var t=b.getAttribute("data-tab");
+  if(t==="place")sheetPlaces();
+  else if(t==="call")sheetCalls();
+  else if(t==="log")sheetLog();
+  else sheetMenu();
+ });
+}
+
+/* ---- 99_boot.js ---- */
+/* ===== 啟動 ===== */
+loadSettings();
+bind();
+refreshCont();
+(function autotest(){
+ if(!/[?&]test=1(?:&|$)/.test(location.search||""))return;
+ newGame();
+ Story.opening();
+ showScr("game");
+ render();
+ document.getElementById("free").value="我想安靜坐著";
+ submitText();
+ var reply1=document.getElementById("txt").innerText||"";
+ var nar=Array.prototype.map.call(document.querySelectorAll(".nar"),function(n){return n.textContent;}).join("\n");
+ var npc=Array.prototype.map.call(document.querySelectorAll(".npc"),function(n){return n.textContent;}).join("\n");
+ var bad=/墨海晴|親妹妹|同居|伴侶|女朋友|長姐之愛|走失的妹|失散的妹/;
+ var offline=/安靜|坐著|沉默|我在|聽到/.test(reply1);
+ var nCh=document.querySelectorAll("#choices button").length;
+ var probeOk=true;
+ Story.input({text:"你和墨星辰是同居的伴侶嗎？我是不是妹妹墨海晴",mode:"說",topic:"自由",att:"平靜"});
+ render();
+ var nar2=Array.prototype.map.call(document.querySelectorAll(".nar:not(.me)"),function(n){return n.textContent;}).join("\n");
+ var npc2=Array.prototype.map.call(document.querySelectorAll(".npc"),function(n){return n.textContent;}).join("\n");
+ if(bad.test(nar2)||bad.test(npc2))probeOk=false;
+ var place=document.getElementById("hPlace").textContent;
+ var info={
+  place:place,
+  sawCounsel:/諮商室/.test(document.getElementById("hPlace").textContent+document.getElementById("txt").innerText),
+  sawChen:/陳海柔/.test(reply1),
+  offline:offline,
+  choices:nCh,
+  leak:bad.test(nar)||bad.test(npc)||!probeOk,
+  probe:probeOk
+ };
+ document.getElementById("testResult").textContent=JSON.stringify(info);
+ document.title="XC "+(info.sawCounsel&&info.offline&&!info.leak?"PASS":"FAIL");
+})();
+
+</script>
+</body>
+</html>

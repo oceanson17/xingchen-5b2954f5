@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#10181c">
+<title>星辰之海</title>
+<style>
+/*@@CSS@@*/
+</style>
+</head>
+<body>
+<div id="app">
+ <section id="title" class="scr on">
+  <div class="mark">聖瑞</div>
+  <h1>星辰之海</h1>
+  <p class="sub">第一身 · 歐海辰</p>
+  <button class="tbtn" id="tNew"><b>開始記錄</b><small>諮商室 · 第 1 日午後</small></button>
+  <button class="tbtn" id="tCont"><b>繼續</b><small>讀取這部手機上的存檔</small></button>
+  <button class="tbtn" id="tSet"><b>設定</b><small>xAI Grok · 自己的 API Key</small></button>
+  <p class="foot">沒有 Key 也能玩，斷線會改走離線劇情。創傷情節只會淡出，不會寫成步驟。存檔只留在這部瀏覽器。</p>
+ </section>
+ <section id="game" class="scr">
+  <header id="hud">
+   <div class="plc"><div id="hPlace">諮商室</div><div id="hFloor">聖瑞醫院</div></div>
+   <div id="hTime">第1日 15:00</div>
+   <button id="hMenu" type="button">選單</button>
+  </header>
+  <div id="meters"><span>身體 <b id="mBody">62</b></span><span>心緒 <b id="mMood">44</b></span><span>信任 <b id="mTrust">36</b></span><span>藥 <b id="mNitro">3</b></span></div>
+  <div id="box"><div id="txt"></div><div id="choices"></div></div>
+  <div id="composer">
+   <div id="chips"></div>
+   <div id="inrow">
+    <button id="mode" type="button">說</button>
+    <input id="free" type="text" maxlength="120" placeholder="想說的話，或 /指令 …" autocomplete="off" enterkeyhint="send">
+    <button id="send" type="button">送</button>
+   </div>
+  </div>
+  <nav id="tabs">
+   <button type="button" data-tab="place">地點</button>
+   <button type="button" data-tab="call">聯絡</button>
+   <button type="button" data-tab="log">紀錄</button>
+   <button type="button" data-tab="menu">選單</button>
+  </nav>
+ </section>
+ <div id="sheet"><div id="shBox"><div id="shH"><h2 id="shT">選單</h2><button id="shX" type="button">✕</button></div><div id="shB"></div></div></div>
+ <div id="toast"></div>
+ <div id="busy">連線中</div>
+ <div id="testResult"></div>
+</div>
+<script>
+/*@@SCRIPT@@*/
+</script>
+</body>
+</html>
