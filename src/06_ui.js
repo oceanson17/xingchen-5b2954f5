@@ -1,4 +1,4 @@
-/* ===== 介面 ===== */
+/* ===== 介面：故事閱讀，不是表單 ===== */
 var UI={};
 var toastT=null;
 function toast(s){var n=document.getElementById("toast");if(!n)return;n.textContent=s;n.className="on";clearTimeout(toastT);toastT=setTimeout(function(){n.className="";},2200);}
@@ -13,56 +13,65 @@ function renderChips(){
  ATTS.forEach(function(t){h+='<button type="button" data-k="att" data-v="'+t+'"'+(Story.att===t?' class="on"':"")+">"+t+"</button>";});
  box.innerHTML=h;
 }
-function portraitNow(){
- var lines=(S.view&&S.view.lines)||[];
- var i;
- for(i=lines.length-1;i>=0;i--){
-  var id=lines[i].sp;
-  if(id&&!lines[i].player&&PORTRAIT[id]&&presentIds().indexOf(id)>=0)return id;
- }
- if(S.focus&&PORTRAIT[S.focus]&&presentIds().indexOf(S.focus)>=0)return S.focus;
- var ids=presentIds();
- for(i=0;i<ids.length;i++)if(PORTRAIT[ids[i]])return ids[i];
- return "";
+function syncPlaceholder(){
+ var ph={"說":"E.【自由輸入】","做":"E.【自由輸入】做一件事，或 /指令","設定":"E.【自由輸入】寫下一件已經成立的事"};
+ var inp=document.getElementById("free");
+ var mode=document.getElementById("mode");
+ if(mode)mode.textContent=Story.mode;
+ if(inp)inp.placeholder=ph[Story.mode]||"E.【自由輸入】";
+}
+function avatarHtml(id){
+ var p=P(id)||PEOPLE[id]||{n:id,color:"#9bb"};
+ if(PORTRAIT[id])return '<img class="av" alt="" src="assets/'+PORTRAIT[id]+'.webp?v=ch1">';
+ var ch=(p.n||"?").charAt(0);
+ return '<span class="av ph" style="background:'+(p.color||"#8ec9bf")+'">'+esc(ch)+"</span>";
+}
+function renderMeters(){
+ var box=document.getElementById("meters");if(!box||!S)return;
+ var d=(S.delta)||{body:0,speech:0,mood:0,trust:0};
+ var vals=[
+  ["身體",S.body,d.body],
+  ["語言",S.speech==null?58:S.speech,d.speech],
+  ["心緒",S.mood,d.mood],
+  ["信任",typeof S.rel==="number"?S.rel:(S.trust.hairuo||0),d.trust]
+ ];
+ var h="";
+ vals.forEach(function(r){
+  var n=+r[2]||0;
+  var mark=n?('<em class="'+(n>0?"up":"dn")+'">'+(n>0?"+"+n:n)+"</em>"):"";
+  h+='<div class="m"><span>'+r[0]+" <b>"+r[1]+"</b>"+mark+'</span><div class="track"><i style="width:'+clamp(r[1],0,100)+'%"></i></div></div>';
+ });
+ box.innerHTML=h;
 }
 function renderTurn(){
  if(!S)return;
  var turn=S.turn||{};
  var sum=document.getElementById("sum");
  if(sum)sum.textContent=turn.summary||"";
- var d=turn.delta||S.delta||{body:0,speech:0,mood:0,trust:0};
- var vals=[["身體",S.body,d.body],["語言",S.speech==null?58:S.speech,d.speech],["心緒",S.mood,d.mood],["信任",typeof S.rel==="number"?S.rel:(S.trust.hairuo||0),d.trust]];
- var bars=document.getElementById("bars");
- if(bars){
-  var h="";
-  vals.forEach(function(r){
-   var n=+r[2]||0;var cls=n>0?"up":(n<0?"dn":"");
-   var mark=n>0?"+"+n:(n<0?String(n):"±0");
-   h+='<div class="bar"><div class="nm">'+r[0]+' <b>'+r[1]+'</b> <span class="dlt '+cls+'">'+mark+'</span></div><div class="track"><i style="width:'+clamp(r[1],0,100)+'%"></i></div></div>';
-  });
-  bars.innerHTML=h;
- }
- var who=document.getElementById("barWho");
- if(who){
-  var eye=turn.pov&&turn.pov!=="haichen"?("眼睛："+(turn.pov==="third"?"第三人稱":cn(turn.pov))+"。"):"眼睛：歐海辰。";
-  var ctrl=S.control&&S.control!=="haichen"?cn(S.control):"歐海辰";
-  who.textContent=eye+"受控："+ctrl+"。四條仍是歐海辰的身體、語言、心緒、信任。";
+ var pres=document.getElementById("presence");
+ if(pres){
+  var ids=presentIds();
+  pres.textContent=ids.length?("誰在場："+ids.map(cn).join("、")):"誰在場：只有你";
  }
  var count=document.getElementById("count");
  if(count){
   if(turn.countdown&&turn.countdown.left!=null){
    count.hidden=false;
-   count.textContent="倒計時："+turn.countdown.label+" 剩 "+turn.countdown.left+" 分鐘";
+   count.textContent="倒計時　"+turn.countdown.label+"　剩 "+turn.countdown.left+" 分鐘";
   }else{count.hidden=true;count.textContent="";}
  }
- var snap=document.getElementById("snap");
- if(snap){
-  var sh="";
-  (turn.snap||[]).forEach(function(p){
-   sh+='<div class="snapc"><b>'+esc(p.n)+'</b><small>'+esc(p.role||"")+'</small><p>'+esc(p.core||"")+'</p><p>'+esc(p.line||"")+'</p></div>';
-  });
-  snap.innerHTML=sh;
- }
+}
+function sheetPeople(){
+ if(!S)return;
+ var snap=(S.turn&&S.turn.snap)||[];
+ var h="";
+ snap.forEach(function(p){
+  h+='<div class="snapc"><b>'+esc(p.n)+'</b><small>'+esc(p.role||"")+'</small><p>'+esc(p.core||"")+'</p><p>'+esc(p.line||"")+'</p></div>';
+ });
+ if(!h)h='<p class="logl">這一幕還沒有人物快照。</p>';
+ var eye=S.turn&&S.turn.pov&&S.turn.pov!=="haichen"?("這一幕的眼睛："+(S.turn.pov==="third"?"第三人稱":cn(S.turn.pov))+"。"):"";
+ if(eye)h='<p class="logl">'+esc(eye)+"四條仍是歐海辰的。</p>"+h;
+ openSheet("人物",h);
 }
 function render(){
  if(!S||!S.view)return;
@@ -80,47 +89,37 @@ function render(){
    bg.style.backgroundImage="url('assets/bg_"+key+".webp?v=ch1')";
   }
  }
- var who=portraitNow();
- var holder=document.getElementById("char");
- var img=document.getElementById("charImg");
- if(holder&&img){
-  if(who&&PORTRAIT[who]){
-   var src="assets/"+PORTRAIT[who]+".webp?v=ch1";
-   if(img.getAttribute("src")!==src)img.setAttribute("src",src);
-   img.alt=cn(who);
-   holder.hidden=false;
-  }else holder.hidden=true;
- }
- var d=(S.delta)||{body:0,speech:0,mood:0,trust:0};
- function fmt(n){n=+n||0;if(n>0)return "+"+n;if(n<0)return String(n);return "±0";}
- document.getElementById("mBody").textContent=S.body+" "+fmt(d.body);
- document.getElementById("mSpeech").textContent=(S.speech==null?58:S.speech)+" "+fmt(d.speech);
- document.getElementById("mMood").textContent=S.mood+" "+fmt(d.mood);
- document.getElementById("mTrust").textContent=(typeof S.rel==="number"?S.rel:(S.trust.hairuo||0))+" "+fmt(d.trust);
+ renderMeters();
  renderTurn();
  var html="";
  (S.view.lines||[]).forEach(function(l){
-  if(!l.sp||l.player){html+='<p class="nar'+(l.player?" me":"")+'">'+esc(l.t)+"</p>";return;}
+  if(l.player||l.sp==="haichen"){html+='<p class="me">'+esc(l.t)+"</p>";return;}
+  if(!l.sp){
+   if(/^第.+章/.test(l.t))html+='<p class="chap">'+esc(l.t)+"</p>";
+   else html+='<p class="nar">'+esc(l.t)+"</p>";
+   return;
+  }
   var p=P(l.sp)||PEOPLE[l.sp]||{n:l.sp,color:"#9bb"};
-  html+='<div class="say npc"><div class="nm" style="color:'+esc(p.color||"#9bb")+'">'+esc(p.n||"")+'</div><div class="bub">'+esc(l.t)+"</div></div>";
+  html+='<div class="say"><div>'+avatarHtml(l.sp)+'</div><div class="sk"><div class="nm" style="color:'+esc(p.color||"#9bb")+'">'+esc(p.n||"")+'</div><div class="ln">'+esc(l.t)+"</div></div></div>";
  });
  document.getElementById("txt").innerHTML=html;
  var ch=document.getElementById("choices");ch.innerHTML="";
- var letters="ABCDE";
+ var letters="ABCD";
  (S.view.ch||[]).slice(0,5).forEach(function(c,i){
   var b=document.createElement("button");b.type="button";
   var tag=c.tag||"探索";
-  b.textContent=letters.charAt(i)+".【"+tag+"】"+c.t;
+  var mark=i<4?(letters.charAt(i)+"."):"";
+  b.innerHTML=(mark?'<span class="tag">'+mark+"【"+esc(tag)+"】</span>":'<span class="tag">【'+esc(tag)+"】</span>")+esc(c.t);
   b.dataset.i=String(i);
-  b.addEventListener("click",function(){var cur=S.view.ch[i];if(!cur)return;Story.act(cur.act);render();var box=document.getElementById("box");if(box)box.scrollTop=0;});
+  b.addEventListener("click",function(){
+   var cur=S.view.ch[i];if(!cur)return;
+   Story.act(cur.act);render();
+   var box=document.getElementById("box");if(box)box.scrollTop=0;
+  });
   ch.appendChild(b);
  });
- var hint=document.getElementById("freeHint");
- if(hint){
-  var n=(S.view.ch||[]).length;
-  hint.textContent=(n>=5?"【自由輸入】":"E.【自由輸入】")+"底下自己打。遊戲不會替你選。";
- }
  renderChips();
+ syncPlaceholder();
  var box=document.getElementById("box");if(box)box.scrollTop=0;
 }
 function afterScene(){render();}
@@ -172,11 +171,13 @@ function sheetLog(){
 }
 function sheetMenu(){
  var h="";
+ h+='<button class="row" id="mPeople" type="button"><b>人物</b><small>陳海柔、墨星辰、歐海辰</small></button>';
  h+='<button class="row" id="mSave" type="button"><b>存檔</b><small>寫入這部瀏覽器</small></button>';
  h+='<button class="row" id="mTitle" type="button"><b>回標題</b><small>進度已自動存</small></button>';
  h+='<button class="row" id="mSet" type="button"><b>AI 設定</b><small>'+(SET.ai?"已啟用":"未啟用")+"</small></button>";
- h+='<p class="logl">「說」只是說話，不會被當成命令。「做」和 /指令 會真的發生，並寫出結果。/設定 已經成立，不會被否定。「...」或沉默，世界仍會往前。每回合底下有摘要、行動、四條狀態、人物快照。秘密不會因為一句閒話傳開。</p>';
+ h+='<p class="logl">「說」只是說話。「做」和 /指令 會真的發生。/設定 已經成立。「...」或沉默，在場的人仍會先動。人物快照在「人物」。</p>';
  openSheet("選單",h);
+ document.getElementById("mPeople").onclick=function(){sheetPeople();};
  document.getElementById("mSave").onclick=function(){saveGame(false);};
  document.getElementById("mTitle").onclick=function(){closeSheet();showScr("title");refreshCont();};
  document.getElementById("mSet").onclick=function(){closeSheet();openSettings();};
@@ -212,21 +213,33 @@ function openSettings(){
  };
 }
 function refreshCont(){var b=document.getElementById("tCont");if(!b)return;b.disabled=!hasSave();b.style.opacity=hasSave()?1:.45;}
+/* 把整頁釘在視覺視窗裡：鍵盤與 Safari 底欄蓋住的部分不把頁面頂走。 */
+function pinFrame(){
+ var app=document.getElementById("app");if(!app)return;
+ var vv=window.visualViewport;
+ if(!vv){app.style.height="";app.style.transform="";return;}
+ var top=vv.offsetTop||0;
+ var h=vv.height||window.innerHeight;
+ app.style.height=Math.round(h)+"px";
+ app.style.transform="translateY("+Math.round(top)+"px)";
+}
 function bind(){
  document.getElementById("tNew").onclick=function(){newGame();Story.opening();showScr("game");render();};
  document.getElementById("tCont").onclick=function(){if(!loadGame()){toast("沒有存檔");return;}showScr("game");render();};
- document.getElementById("tSet").onclick=openSettings;
  document.getElementById("hMenu").onclick=sheetMenu;
  document.getElementById("shX").onclick=closeSheet;
  document.getElementById("sheet").addEventListener("click",function(e){if(e.target.id==="sheet")closeSheet();});
  document.getElementById("send").onclick=submitText;
- document.getElementById("free").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();submitText();}});
+ var free=document.getElementById("free");
+ free.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();submitText();}});
+ free.addEventListener("focus",function(){
+  pinFrame();
+  var n=0;var id=setInterval(function(){pinFrame();if(++n>10)clearInterval(id);},50);
+ });
  document.getElementById("mode").onclick=function(){
   var seq=["說","做","設定"];
   var i=seq.indexOf(Story.mode);Story.mode=seq[(i+1)%3];
-  this.textContent=Story.mode;
-  var ph={"說":"想說的話。說出口不會被當成命令","做":"做一件事，或 /指令 …","設定":"寫下一件已經成立的事"};
-  document.getElementById("free").placeholder=ph[Story.mode];
+  syncPlaceholder();
  };
  document.getElementById("chips").addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
@@ -240,6 +253,14 @@ function bind(){
   if(t==="place")sheetPlaces();
   else if(t==="call")sheetCalls();
   else if(t==="log")sheetLog();
-  else sheetMenu();
+  else if(t==="people")sheetPeople();
  });
+ pinFrame();
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",pinFrame);
+  window.visualViewport.addEventListener("scroll",pinFrame);
+ }
+ window.addEventListener("resize",pinFrame);
+ window.addEventListener("orientationchange",pinFrame);
+ window.addEventListener("scroll",function(){if(window.scrollX||window.scrollY)window.scrollTo(0,0);pinFrame();},{passive:true});
 }

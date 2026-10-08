@@ -143,27 +143,48 @@ Story.traceOf=function(tr){
 };
 Story.silenceScene=function(){
  S.flags.silence=(S.flags.silence||0)+1;
- var lines=[];
+ var ids=presentIds();
  var flooded=(S.speech!=null&&S.speech<36)||S.mood<35;
- var who=presentIds().indexOf("hairuo")>=0?"hairuo":(presentIds()[0]||"");
- if(presentIds().indexOf("hairuo")>=0){
-  lines.push({sp:"hairuo",t:flooded?"你先別找句子。我看得到你還在。這節不會因為你不出聲就結束，我也不會假裝什麼都沒發生。":"沉默也算數。我不把空格填成我想聽的。時鐘還是往前走。"});
-  lines.push({sp:"",t:"你沒有補上下一句。喉嚨發緊，視野邊緣薄薄起了一層霧。拇指把那枚塑膠扣又按深一點。"});
- } else if(presentIds().indexOf("xingchen")>=0){
-  lines.push({sp:"xingchen",t:"不說也可以。人還在。我看見了。下一處你若空著，我還是會問。"});
-  lines.push({sp:"",t:"你的嘴沒有跟上。呼吸比剛才淺，胸口那陣緊抬了一下頭。"});
+ var lines=[];
+ var who="";
+ if(ids.indexOf("hairuo")>=0&&ids.indexOf("xingchen")>=0){
+  who="hairuo";
+  lines.push({sp:"",t:"你沒有接話。鐘走了一格。"});
+  lines.push({sp:"hairuo",t:"墨醫生。這拍是空的。先讓我收。"});
+  lines.push({sp:"xingchen",t:"陳醫生。空著也是她在。我看見了，不替她填。"});
+  lines.push({sp:"hairuo",t:flooded?"看我。手放下。這不是商量。":"我不把你的沉默寫成同意。再空一拍，我來定你留在哪。"});
+ } else if(ids.indexOf("hairuo")>=0){
+  who="hairuo";
+  lines.push({sp:"",t:"你沒有補上下一句。喉嚨發緊，視野邊緣薄薄起了一層霧。"});
+  lines.push({sp:"hairuo",t:flooded?"別找句子。":"沉默也算數。"});
+  lines.push({sp:"",t:"她把筆放下，身體前傾，視線釘在你按著塑膠扣的那隻手上。"});
+  lines.push({sp:"hairuo",t:flooded?"手給我。扣子按到發白，不是治療。":"我不填你的空格。你再空一拍，我就用我的方式把你留在這張椅子上。"});
+ } else if(ids.indexOf("xingchen")>=0){
+  who="xingchen";
+  lines.push({sp:"",t:"你的嘴沒有跟上。她先看你的手，再看你的眼睛。"});
+  lines.push({sp:"xingchen",t:"不說也可以。"});
+  lines.push({sp:"xingchen",t:"人還在。我看見了。下一處你若空著，我還是會來問。"});
+ } else if(ids.indexOf("liu")>=0&&ids.indexOf("li")>=0){
+  who="liu";
+  lines.push({sp:"",t:"你不接話。兩個人對看了一眼。"});
+  lines.push({sp:"li",t:"啟明，她沒有答。你別當成沒聽見。"});
+  lines.push({sp:"liu",t:"李珮儀。沉默不是交表。歐海辰，我還在等。"});
+ } else if(ids.length){
+  who=ids[0];
+  lines.push({sp:"",t:"你沒有接。對方沒有把這拍讓過去。"});
+  lines.push({sp:who,t:"你還在。那我就再等你一句。"});
+  lines.push({sp:who,t:"不說，我也把這一拍記下來。"});
  } else {
   lines.push({sp:"",t:"沒有人等你把句子說完。牆上的鐘走了一格。胸口那陣緊自己抬起來，又停在一半。"});
+  lines.push({sp:"",t:"未完的那一句還卡在齒間。"});
  }
- lines.push({sp:"",t:"未完的那一句還卡在齒間。"});
  return {lines:lines,ch:Story.placeChoices(S.place),opt:{
   min:5,speech:-3,mood:-2,body:-1,trust:{hairuo:1},
-  summary:"你幾乎沒有給出行動。世界仍往前走了一小段：有人先開口，或一個症狀自己動了。風險是語言再降，選擇權會被別人接走。未解：她在等的那一句，你還沒有給。",
+  summary:"你幾乎沒有給出行動。在場的人先動了：一句話，或一個把決定權抓過去的動作。風險是語言再降，選擇權會被別人接走。未解：她在等的那一句，你還沒有給。",
   tension:"下一拍若仍是空的，在場的人會替你做一個你可能不接受的判斷",
   trace:{k:"缺席",who:who||"hairuo",note:"你以沉默或拒絕把這一拍交了出去"}
  }};
 };
-
 Story.armHunt=function(why){
  if(!S.hunt)S.hunt={on:0,miss:0,n:0};
  S.hunt.on=1;
@@ -187,10 +208,119 @@ Story.tickHunt=function(lines,opt){
  ];
  var line=q[Math.min(S.hunt.n-1,q.length-1)];
  Story.note("xingchen","在"+((PLACES[S.place]||{}).n||"這裡")+"找到歐海辰。還沒有對上任何身份");
- return lines.concat([
-  {sp:"",t:"門邊多了一個人。短而亂的黑髮，白襯衫，黑框眼鏡。墨星辰看著我，沒有笑。"},
+ var extra=[
+  {sp:"",t:"門邊多了一個人。短而亂的黑髮，白襯衫，黑框眼鏡。墨星辰看著你，沒有笑。"},
   {sp:"xingchen",t:line}
- ]);
+ ];
+ if(presentIds().indexOf("hairuo")>=0){
+  extra.push({sp:"hairuo",t:"墨醫生。人還坐著。你先別在門口下結論。"});
+  extra.push({sp:"xingchen",t:"陳醫生。我沒有要帶人走。我只是要看見她還在。"});
+ } else {
+  extra.push({sp:"xingchen",t:"手如果在抖，就放下。我看得清楚。這不是收你。"});
+ }
+ return lines.concat(extra);
+};
+Story.nameHits=function(id){
+ var m={
+  hairuo:["陳海柔","海柔","陳醫生"],
+  xingchen:["墨星辰","墨醫生","墨副院長"],
+  liu:["劉啟明","啟明"],
+  li:["李珮儀","珮儀"],
+  su:["蘇芷晴","蘇姐"],
+  lin:["林澤松","院長"]
+ };
+ return m[id]||[cn(id)];
+};
+Story.talksTo=function(lines,a,b){
+ var nb=Story.nameHits(b),na=Story.nameHits(a);
+ return (lines||[]).some(function(l){
+  if(l.sp===a)return nb.some(function(n){return String(l.t||"").indexOf(n)>=0;});
+  if(l.sp===b)return na.some(function(n){return String(l.t||"").indexOf(n)>=0;});
+  return false;
+ });
+};
+Story.secondLine=function(id){
+ var bank={
+  hairuo:[
+   "我聽見了。下一句你自己說，我不代筆。",
+   "看我。這不是安撫，是要你還在這張椅子上。",
+   "手放下。那枚扣不是答案。",
+   "你可以不答。我不把空白填成我想聽的。"
+  ],
+  xingchen:[
+   "說完也可以停。人我看見了。",
+   "手放下。我不是來趕你，我是來確認你還在。",
+   "下一句你自己決定。我不會替你說完。",
+   "陳海柔若問，我會說你在這裡。其餘的，現在不問。"
+  ],
+  liu:["表。今天。沒有第二句客套。","你站著也算。心裡在算什麼，我不管。"],
+  li:["你看一下嘛。我不是在求，我是走不開。","別瞪我。表在你那邊比較快。"],
+  su:["先吃飯。人還在就好。","想不起來的那段，先別逼自己。"],
+  lin:["人在瑞士。這句不是安慰。","我可以代你們決定。這一次，先不動。"]
+ };
+ var arr=bank[id]||["我在。","你繼續。我聽。"];
+ if(!S.flags)S.flags={};
+ var n=S.flags.beat||0;
+ S.flags.beat=n+1;
+ return arr[n%arr.length];
+};
+Story.crossLine=function(a,b){
+ var key=[a,b].sort().join("|");
+ var table={
+  "hairuo|xingchen":[
+   [
+    {sp:"hairuo",t:"墨醫生。她還坐著。你先別在門口下結論。"},
+    {sp:"xingchen",t:"陳醫生。我沒有下結論。人在，我問一句。"}
+   ],
+   [
+    {sp:"xingchen",t:"陳醫生。你的病人不說話。你要留，還是我問？"},
+    {sp:"hairuo",t:"我來留。你先把那句問句收回去。"}
+   ]
+  ],
+  "li|liu":[
+   [
+    {sp:"li",t:"啟明，你站那麼近，表也不會自己寫完。"},
+    {sp:"liu",t:"李珮儀。催的是時間，不是你的下午。"}
+   ],
+   [
+    {sp:"liu",t:"李珮儀。少替她答。"},
+    {sp:"li",t:"啟明，你催她之前先看她的手。她在抖。"}
+   ]
+  ]
+ };
+ var set=table[key];
+ if(!set){
+  return [
+   {sp:a,t:cn(b)+"。你先說。我接下一句。"},
+   {sp:b,t:cn(a)+"。說完了。剩下的讓她自己選。"}
+  ];
+ }
+ var n=(S.flags&&S.flags.beat)||0;
+ return set[n%set.length];
+};
+Story.ensureTalk=function(lines){
+ lines=lines||[];
+ var ids=presentIds();
+ if(!ids.length)return lines;
+ function spoken(){
+  return lines.filter(function(l){return l.sp&&!l.player&&l.sp!=="haichen";});
+ }
+ if(ids.length>=2){
+  var a=ids[0],b=ids[1];
+  if(ids.indexOf("hairuo")>=0&&ids.indexOf("xingchen")>=0){a="hairuo";b="xingchen";}
+  else if(ids.indexOf("liu")>=0&&ids.indexOf("li")>=0){a="liu";b="li";}
+  if(!Story.talksTo(spoken(),a,b)){
+   Story.crossLine(a,b).forEach(function(l){lines.push(l);});
+  }
+ }
+ var guard=0;
+ while(spoken().length<2&&guard<3){
+  var spk=spoken();
+  var who=(spk[0]&&spk[0].sp)||ids[0];
+  lines.push({sp:who,t:Story.secondLine(who)});
+  guard++;
+ }
+ return lines;
 };
 Story.pack=function(lines,choices,opt){
  opt=opt||{};
@@ -226,6 +356,7 @@ Story.pack=function(lines,choices,opt){
   var eye=pov==="third"?"第三人稱":cn(pov);
   lines=[{sp:"",t:"這一幕從"+eye+"的眼睛看。"}].concat(lines);
  }
+ lines=Story.ensureTalk(lines);
  var ids=presentIds();
  if(S.focus && ids.indexOf(S.focus)<0)S.focus=ids[0]||"";
  var sc=FW.scrubScene({lines:lines,ch:Story.normChoices(choices||[])});
@@ -264,9 +395,9 @@ Story.placeChoices=function(pid){
 };
 Story.arrive=function(pid){
  var L={
-  counsel:[{sp:"",t:"諮商室的燈還是白的。我回到單人沙發上，拇指又去找那枚塑膠扣。"},{sp:"hairuo",t:"你回來了。坐。要說、要不說，都還是你的。"}],
+  counsel:[{sp:"",t:"諮商室的燈還是白的。你回到單人沙發上，拇指又去找那枚塑膠扣。"},{sp:"hairuo",t:"你回來了。坐。"},{sp:"hairuo",t:"要說、要不說，都還是你的。別用沉默逼我替你選。"}],
   hall:[{sp:"",t:"心理科走廊有消毒水的味道。我數地磚，一、二、三，讓腳步跟上心口。"}],
-  data:[{sp:"",t:"血管數據室的螢幕一排排亮著。李珮儀把一疊表往我這邊推，像推開自己的下午。"},{sp:"liu",t:"歐海辰。表，今天。"},{sp:"li",t:"你看一下嘛，我等下真的有事。"}],
+  data:[{sp:"",t:"血管數據室的螢幕一排排亮著。李珮儀把一疊表往你這邊推，像推開自己的下午。"},{sp:"li",t:"啟明，表你瞪也瞪不完。"},{sp:"liu",t:"李珮儀，少替她說話。歐海辰，表，今天。"},{sp:"li",t:"你看一下嘛。我等下真的有事。"}],
   nurse:[{sp:"",t:"護士站的告示寫著護士長病休，名字是蘇芷晴。我讀了兩遍，沒有面孔跟上來。"}],
   lobby:[{sp:"",t:"大堂的冷氣更乾。旋轉門轉得很慢。我可以出去，也可以回頭。"}],
   cafe:[{sp:"",t:"咖啡機的噪音很穩。我坐在靠牆的位子，把糖包的邊角轉正。"}],
@@ -284,12 +415,14 @@ Story.opening=function(){
  if(S.hunt)S.hunt.on=0;
  return Story.pack([
   {sp:"",t:"第一章 · 刀刃與界限"},
-  {sp:"",t:"諮商室。午後。窗簾只留一條縫，白燈打在紙上。你坐得很直，雙手交疊在膝上，拇指摩挲衣角上一枚磨圓的塑膠扣。喉嚨是乾的。視野邊緣有一層很薄的霧，還沒有厚到看不清她。"},
-  {sp:"",t:"陳海柔低頭看你剛交上的一週記錄。表上的數字，比你心裡那份真實要輕。睡眠、疼痛、頭痛，你都寫得比較好過。她的筆尖沒有動。你聽見自己的脈搏，比這間房的鐘快。"},
-  {sp:"",t:"她的手指在紙頁上停住。她注意到了。空氣裡有消毒水，很淡，像從走廊漏進來。"},
-  {sp:"",t:"你怕下一句是精神科病房。記憶湧上，身體緊繃。肩膀抬起來，又被你自己壓回去。你沒有把那段補完，痛的時候嘴角仍是平的。"},
-  {sp:"hairuo",t:"看著我。這不是強制入院。我不會用一張表把你送走。"},
+  {sp:"",t:"諮商室。午後。窗簾留一條縫，白燈打在紙上。你坐得很直，拇指摩挲衣角那枚磨圓的塑膠扣。喉嚨是乾的。視野邊緣有一層薄霧。"},
+  {sp:"",t:"陳海柔看你交上的一週記錄。睡眠、疼痛、頭痛，都寫得比心裡那份輕。筆尖沒有動。你聽見自己的脈搏，比這間房的鐘快。"},
+  {sp:"hairuo",t:"看著我。"},
+  {sp:"",t:"她把「睡眠」那一欄按住，沒有笑。她注意到了。消毒水從走廊漏進來，很淡。"},
+  {sp:"hairuo",t:"這不是強制入院。我不會用一張表把你送走。"},
+  {sp:"",t:"你怕下一句是精神科病房。記憶湧上，身體緊繃。肩膀抬起來，又被你自己壓回去。"},
   {sp:"hairuo",t:"如果痛到受不了，你唯一的選擇，是打電話給我，或者直接來敲門。"},
+  {sp:"",t:"她沒有把聲音放軟。筆帽扣上。"},
   {sp:"hairuo",t:"我不准你再傷害自己。你的命，我管。"}
  ],[
   ch("說出怕被送進病房",{type:"choice",id:"fear"},"對抗"),
@@ -307,8 +440,9 @@ Story.go=function(pid){
  var lines=[];
  if(from==="counsel"&&pid!=="counsel"&&!S.flags.leftCounsel){
   S.flags.leftCounsel=1;
-  lines.push({sp:"",t:"我站起來。膝上的摺痕還在。"});
-  lines.push({sp:"hairuo",t:"門在。你要走可以走。我還在這間房，也在你願意回來的時候。"});
+  lines.push({sp:"",t:"你站起來。膝上的摺痕還在。"});
+  lines.push({sp:"hairuo",t:"門在。你要走可以走。"});
+  lines.push({sp:"hairuo",t:"我還在這間房。你若是躲，我不會當沒看見。"});
  }
  if(pid!==from)Story.armHunt("leave");
  S.place=pid;
