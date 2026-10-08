@@ -28,7 +28,7 @@ button{cursor:pointer;touch-action:manipulation;}
  content:"";position:absolute;inset:0;
  background:
   linear-gradient(180deg,rgba(8,10,12,.15) 0%,rgba(8,10,12,.55) 42%,rgba(8,10,12,.92) 100%),
-  url("assets/bg_counsel.webp?v=ch1") center/cover no-repeat;
+  url("assets/bg_counsel.webp?v=thin2") center/cover no-repeat;
 }
 #title h1,#title .tbtn{position:relative;z-index:1;}
 #title h1{

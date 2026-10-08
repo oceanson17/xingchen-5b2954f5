@@ -22,7 +22,7 @@ function syncPlaceholder(){
 }
 function avatarHtml(id){
  var p=P(id)||PEOPLE[id]||{n:id,color:"#9bb"};
- if(PORTRAIT[id])return '<img class="av" alt="" src="assets/'+PORTRAIT[id]+'.webp?v=ch1">';
+ if(PORTRAIT[id])return '<img class="av" alt="" src="assets/'+PORTRAIT[id]+'.webp?v=thin2">';
  var ch=(p.n||"?").charAt(0);
  return '<span class="av ph" style="background:'+(p.color||"#8ec9bf")+'">'+esc(ch)+"</span>";
 }
@@ -73,6 +73,13 @@ function sheetPeople(){
  if(eye)h='<p class="logl">'+esc(eye)+"四條仍是歐海辰的。</p>"+h;
  openSheet("人物",h);
 }
+function sceneBgKey(){
+ if(!S)return "counsel";
+ var f=S.flags||{};
+ var patient=S.place==="ward"||S.place==="er"||!!(f.admitted||f.inBed||f.inbed||f.bed||f.patient);
+ if(patient)return "ward";
+ return (typeof PLACE_BG!=="undefined"&&PLACE_BG[S.place])||"hall";
+}
 function render(){
  if(!S||!S.view)return;
  var pl=PLACES[S.place]||{n:"",floor:""};
@@ -83,10 +90,10 @@ function render(){
  document.getElementById("hTime").textContent=timeStr();
  var bg=document.getElementById("bg");
  if(bg){
-  var key=(typeof PLACE_BG!=="undefined"&&PLACE_BG[S.place])||"lobby";
+  var key=sceneBgKey();
   if(bg.getAttribute("data-k")!==key){
    bg.setAttribute("data-k",key);
-   bg.style.backgroundImage="url('assets/bg_"+key+".webp?v=ch1')";
+   bg.style.backgroundImage="url('assets/bg_"+key+".webp?v=thin2')";
   }
  }
  renderMeters();
@@ -182,33 +189,80 @@ function sheetMenu(){
  document.getElementById("mTitle").onclick=function(){closeSheet();showScr("title");refreshCont();};
  document.getElementById("mSet").onclick=function(){closeSheet();openSettings();};
 }
+function modelOptions(preset,current){
+ var p=PRESETS[preset]||PRESETS.custom;
+ var models=(p.models||[]).slice();
+ if(current&&models.indexOf(current)<0)models.unshift(current);
+ if(!models.length)return '<option value="">（自訂模型）</option>';
+ return models.map(function(m){return '<option value="'+esc(m)+'"'+(m===current?" selected":"")+">"+esc(m)+"</option>";}).join("");
+}
+function applyPresetFields(k){
+ var p=PRESETS[k]||PRESETS.custom;
+ SET.preset=k;
+ if(k!=="custom"){
+  if(p.base)SET.base=p.base;
+  if(p.model)SET.model=p.model;
+ }
+ var base=document.getElementById("sBase");
+ var model=document.getElementById("sModel");
+ var model2=document.getElementById("sModel2");
+ var note=document.getElementById("sNote");
+ var pre=document.getElementById("sPre");
+ if(pre)pre.value=k;
+ if(base)base.value=SET.base||"";
+ if(model2)model2.value=SET.model||"";
+ if(model)model.innerHTML=modelOptions(k,SET.model||"");
+ if(note)note.textContent=p.key||"";
+}
+function readSettingsForm(){
+ SET.ai=document.getElementById("sAi").checked;
+ SET.preset=document.getElementById("sPre").value;
+ SET.base=document.getElementById("sBase").value.trim();
+ var listed=document.getElementById("sModel").value||"";
+ var typed=(document.getElementById("sModel2").value||"").trim();
+ SET.model=typed||listed;
+ SET.key=document.getElementById("sKey").value.trim();
+ SET.firewall=document.getElementById("sFw").checked;
+ if(!SET.base&&SET.preset!=="custom")SET.base=(PRESETS[SET.preset]&&PRESETS[SET.preset].base)||"";
+ if(!SET.model&&SET.preset!=="custom")SET.model=(PRESETS[SET.preset]&&PRESETS[SET.preset].model)||"";
+}
 function openSettings(){
  var opts="";
  PRESET_ORDER.forEach(function(k){opts+='<option value="'+k+'"'+(SET.preset===k?" selected":"")+">"+esc(PRESETS[k].n)+"</option>";});
- var models=(PRESETS[SET.preset]||PRESETS.xai).models||[];
- var mh=models.map(function(m){return '<option value="'+esc(m)+'"'+(SET.model===m?" selected":"")+">"+esc(m)+"</option>";}).join("");
+ var cur=PRESETS[SET.preset]||PRESETS.deepseek;
  var html="";
  html+='<label class="f"><input id="sAi" type="checkbox" '+(SET.ai?"checked":"")+"> 啟用 AI（失敗自動改離線）</label>";
  html+='<label class="f">服務</label><select class="f" id="sPre">'+opts+"</select>";
- html+='<label class="f">Base URL</label><input class="f" id="sBase" value="'+esc(SET.base)+'">';
- html+='<label class="f">模型</label><select class="f" id="sModel">'+mh+'</select><input class="f" id="sModel2" value="'+esc(SET.model)+'" style="margin-top:6px">';
- html+='<label class="f">API Key（只存在這部瀏覽器）</label><input class="f" id="sKey" type="password" value="'+esc(SET.key)+'" autocomplete="off">';
- html+='<p class="logl">'+esc((PRESETS[SET.preset]||{}).key||"")+"</p>";
+ html+='<p class="logl" id="sNote">'+esc(cur.key||"")+"</p>";
+ html+='<label class="f">Base URL</label><input class="f" id="sBase" value="'+esc(SET.base)+'" autocapitalize="off" autocorrect="off" spellcheck="false">';
+ html+='<label class="f">模型</label><select class="f" id="sModel">'+modelOptions(SET.preset,SET.model)+'</select><input class="f" id="sModel2" value="'+esc(SET.model)+'" autocapitalize="off" autocorrect="off" spellcheck="false" style="margin-top:6px">';
+ html+='<label class="f">API Key（只存在這部瀏覽器）</label><input class="f" id="sKey" type="password" value="'+esc(SET.key)+'" autocomplete="off" autocapitalize="off" spellcheck="false">';
  html+='<label class="f"><input id="sFw" type="checkbox" '+(SET.firewall?"checked":"")+"> 知情防火牆</label>";
+ html+='<button class="row" id="sDef" type="button"><b>還原此服務的預設 Base／模型</b></button>';
+ html+='<button class="row" id="sClr" type="button"><b>清除 API Key</b></button>';
  html+='<button class="row" id="sSave" type="button"><b>儲存設定</b></button>';
  openSheet("設定",html);
  document.getElementById("sPre").onchange=function(){
-  var k=this.value;var p=PRESETS[k];if(!p)return;
-  SET.preset=k;if(p.base)document.getElementById("sBase").value=p.base;
-  if(p.model)document.getElementById("sModel2").value=p.model;
+  applyPresetFields(this.value);
+ };
+ document.getElementById("sModel").onchange=function(){
+  if(this.value)document.getElementById("sModel2").value=this.value;
+ };
+ document.getElementById("sDef").onclick=function(){
+  var k=document.getElementById("sPre").value||"deepseek";
+  applyPresetFields(k);
+  readSettingsForm();
+  saveSettings();
+  toast("已還原「"+((PRESETS[k]||{}).n||"")+"」的 Base 與模型");
+ };
+ document.getElementById("sClr").onclick=function(){
+  document.getElementById("sKey").value="";
+  SET.key="";
+  saveSettings();
+  toast("已清除 API Key");
  };
  document.getElementById("sSave").onclick=function(){
-  SET.ai=document.getElementById("sAi").checked;
-  SET.preset=document.getElementById("sPre").value;
-  SET.base=document.getElementById("sBase").value.trim();
-  SET.model=(document.getElementById("sModel2").value||document.getElementById("sModel").value||"").trim();
-  SET.key=document.getElementById("sKey").value.trim();
-  SET.firewall=document.getElementById("sFw").checked;
+  readSettingsForm();
   saveSettings();toast("設定已儲存");closeSheet();
  };
 }
